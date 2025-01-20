@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "mobile": "next dev -H 192.168.1.6",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -20,6 +19,7 @@
     "@radix-ui/react-tooltip": "^1.1.6",
     "@supabase/supabase-js": "^2.47.14",
     "@tabler/icons-react": "^3.28.1",
+    "bowser": "^2.11.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^11.18.0",

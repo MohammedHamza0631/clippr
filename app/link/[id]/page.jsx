@@ -9,7 +9,7 @@ import DeviceStats from '@/components/device-stats'
 import { getClicksForUrl } from '@/db/apiClicks'
 import { deleteUrl, getUrl } from '@/db/apiUrls'
 import { Copy, Download, LinkIcon, Trash, Check } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { BarLoader, BeatLoader } from 'react-spinners'
 import { useRouter } from 'next/navigation'
 import React from 'react'
@@ -21,7 +21,6 @@ const LinkPage = ({ params }) => {
   const [copied, setCopied] = useState(false)
   const [downloading, setDownloading] = useState(false)
 
- 
   const {
     loading,
     data: url,
@@ -42,7 +41,6 @@ const LinkPage = ({ params }) => {
     if (user && user.id) {
       fnGetUrl()
     }
-    
   }, [user])
 
   // Fetch stats after URL is loaded
@@ -189,11 +187,13 @@ const LinkPage = ({ params }) => {
               )}
             </Button>
           </div>
-          <img
-            src={url?.qr_code}
-            className='w-full self-center sm:self-start ring ring-blue-500 p-1 object-contain'
-            alt='qr code'
-          />
+          <Suspense fallback='QR code Loading...'>
+            <img
+              src={url?.qr_code}
+              className='w-full self-center sm:self-start ring ring-blue-500 p-1 object-contain'
+              alt='qr code'
+            />
+          </Suspense>
         </div>
 
         <Card className='sm:w-3/5'>
