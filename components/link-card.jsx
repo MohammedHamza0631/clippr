@@ -50,7 +50,7 @@ export default function LinkCard ({ url, fetchUrls }) {
   }
   const copyToClipboard = () => {
     navigator.clipboard.writeText(
-      'https://clipr.live/' +
+      'https://clipr.vercel.app/' +
         (url?.custom_url ? url?.custom_url : url.short_url)
     )
     setCopied(true)
@@ -71,7 +71,7 @@ export default function LinkCard ({ url, fetchUrls }) {
           {url?.title}
         </span>
         <span className='object-contain text-2xl text-blue-400 md:font-bold hover:underline cursor-pointer'>
-          https://clipr.live/{url?.custom_url ? url?.custom_url : url.short_url}
+          https://clipr.vercel.app/{url?.custom_url ? url?.custom_url : url.short_url}
         </span>
         <span className='flex text-sm md:text-lg items-center gap-1 hover:underline cursor-pointer'>
           <LinkIcon className='p-1' />

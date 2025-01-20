@@ -142,7 +142,7 @@ export default function CreateLink ({ fetchUrls }) {
           />
           {errors.longUrl && <Error message={errors.longUrl} />}
           <div className='flex items-center gap-2'>
-            <Badge className='p-2 bg-zinc-400'>clipr.live</Badge> /
+            <Badge className='p-2 bg-zinc-400'>clipr.vercel.app</Badge> /
             <Input
               id='customUrl'
               placeholder='Custom Link (optional)'
@@ -309,7 +309,7 @@ export default function CreateLink ({ fetchUrls }) {
             </Label>
             <div className='flex items-center gap-2'>
               <Badge className='p-2 bg-zinc-600' variant={'outline'}>
-                clipr.live
+                clipr.vercel.app
               </Badge>{' '}
               /
               <Input

@@ -93,7 +93,7 @@ const LinkPage = ({ params }) => {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(
-      'https://clipr.live/' +
+      'https://clipr.vercel.app/' +
         (url?.custom_url ? url?.custom_url : url.short_url)
     )
     setCopied(true)
@@ -111,12 +111,12 @@ const LinkPage = ({ params }) => {
           </span>
           {link && (
             <a
-              href={`https://clipr.live/${link}`}
+              href={`https://clipr.vercel.app/${link}`}
               target='_blank'
               rel='noreferrer'
               className='text-3xl sm:text-4xl text-blue-400 font-bold hover:underline'
             >
-              https://clipr.live/{link}
+              https://clipr.vercel.app/{link}
             </a>
           )}
           <a

@@ -22,13 +22,11 @@ export default function RedirectLink ({ params }) {
   })
 
   useEffect(() => {
-    console.log('Getting Long URL...')
     fnGetLongUrl()
   }, [])
 
   useEffect(() => {
     if (!loadings && urlData) {
-      console.log('Storing Clicks...')
       fnStoreClicks()
     }
   }, [loadings, urlData])
