@@ -17,15 +17,27 @@ export async function GET(request, { params }) {
     );
   }
 
-  // 2) Optionally parse user agent for device info
+  // 2) Extract client IP from headers
+  // Usually "x-forwarded-for" is a comma-separated list; take the first IP
+  const forwardedFor = request.headers.get("x-forwarded-for") || "";
+  const clientIp = forwardedFor.split(",")[0].trim() || "127.0.0.1";
+  // 3) Query ipapi.co with the client IP
+  //    (Might need a paid plan if you exceed free usage)
+  let city = "";
+  let country = "";
+  try {
+    const geoRes = await fetch(`https://ipinfo.io/${clientIp}?token=${process.env.NEXT_PUBLIC_IPINFO_TOKEN}`);
+    const geoData = await geoRes.json();
+    city = geoData.city || "";
+    country = geoData.country || "";
+  } catch (err) {
+    console.error("ipapi error:", err);
+  }
+
+  // 4) Parse user agent for device info
   const userAgent = request.headers.get("user-agent") || "";
   const parsed = Bowser.parse(userAgent);
   const device = parsed.platform?.type;
-
-  const res = await fetch("https://ipapi.co/json/");
-  const data = await res.json();
-  const city = data.city;
-  const country = data.country_name;
 
   const { error } = await supabase.from("clicks").insert({
     url_id: shortLinkData.id,
