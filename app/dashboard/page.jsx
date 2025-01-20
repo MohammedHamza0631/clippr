@@ -65,7 +65,7 @@ export default function Dashboard () {
       </div>
       <div className='flex justify-between'>
         <h1 className='text-4xl font-extrabold'>My Links</h1>
-        <CreateLink />
+        <CreateLink fetchUrls={fnUrls} />
       </div>
       <div className='relative'>
         <Input

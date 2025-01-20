@@ -11,6 +11,8 @@ import { QRCode } from 'react-qrcode-logo'
 import { cn } from '@/lib/utils'
 import useMediaQuery from '@/hooks/use-media-query'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { DrawerFooter } from '@/components/ui/drawer'
 import {
   Dialog,
   DialogContent,
@@ -20,24 +22,17 @@ import {
   DialogTrigger,
   DialogFooter
 } from '@/components/ui/dialog'
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger
-} from '@/components/ui/drawer'
+
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useRouter, useSearchParams } from 'next/navigation'
+import VaulDrawer from '@/components/ui/vaul-drawer'
+import { Drawer } from 'vaul'
 
-export default function CreateLink () {
+export default function CreateLink ({ fetchUrls }) {
   const isDesktop = useMediaQuery('(min-width: 768px)')
-
+  const [open, setOpen] = useState(false)
   const { user } = UrlState()
 
   const router = useRouter()
@@ -91,7 +86,7 @@ export default function CreateLink () {
       const canvas = ref.current.canvasRef.current
       const blob = await new Promise(resolve => canvas.toBlob(resolve))
 
-      await fnCreateUrl(blob)
+      await fnCreateUrl(blob).then(() => fetchUrls())
     } catch (e) {
       const newErrors = {}
 
@@ -102,6 +97,10 @@ export default function CreateLink () {
       setErrors(newErrors)
     }
   }
+  const handleDrawerClose = () => {
+    setOpen(false)
+  }
+
   if (isDesktop) {
     return (
       <Dialog
@@ -143,7 +142,7 @@ export default function CreateLink () {
           />
           {errors.longUrl && <Error message={errors.longUrl} />}
           <div className='flex items-center gap-2'>
-            <Card className='p-2'>clipr.live</Card> /
+            <Badge className='p-2 bg-zinc-400'>clipr.live</Badge> /
             <Input
               id='customUrl'
               placeholder='Custom Link (optional)'
@@ -168,7 +167,76 @@ export default function CreateLink () {
   }
 
   return (
-    <Drawer
+    // <Drawer
+    //   defaultOpen={longLink}
+    //   onOpenChange={res => {
+    //     if (!res) {
+    //       router.push('/dashboard')
+    //     }
+    //   }}
+    // >
+    //   <DrawerTrigger asChild>
+    //     <Button variant='outline'>Create Link</Button>
+    //   </DrawerTrigger>
+    //   <DrawerContent className='flex flex-col gap-4 px-2 overflow-y-auto max-h-[90vh]'>
+    //     <DrawerHeader className='text-left'>
+    //       <DrawerTitle>Create a new Link</DrawerTitle>
+    //     </DrawerHeader>
+    //     <div className='flex flex-col gap-4'>
+    //       <Input
+    //         id='title'
+    //         placeholder="Short Link's Title"
+    //         value={formValues.title}
+    //         onChange={handleChange}
+    //       />
+    //       {errors.title && <Error message={errors.title} />}
+    //       <Input
+    //         id='longUrl'
+    //         placeholder='Enter your Loooong URL'
+    //         value={formValues.longUrl}
+    //         onChange={handleChange}
+    //       />
+    //       {errors.longUrl && <Error message={errors.longUrl} />}
+    //       <div className='flex items-center gap-2'>
+    //         <Card className='p-2'>clipr.live</Card> /
+    //         <Input
+    //           id='customUrl'
+    //           placeholder='Custom URL (optional)'
+    //           value={formValues.customUrl}
+    //           onChange={handleChange}
+    //           className='focus:ring-8 focus:ring-red-500'
+    //         />
+    //       </div>
+    //       {formValues?.longUrl && (
+    //         <div className='flex justify-center'>
+    //           <QRCode
+    //             qrStyle='dots'
+    //             eyeRadius={10}
+    //             ref={ref}
+    //             size={250}
+    //             value={formValues?.longUrl}
+    //           />
+    //         </div>
+    //       )}
+    //     </div>
+    //     {error && <Error message={errors.message} />}
+    //     <DrawerFooter className='pt-2'>
+    //       <Button
+    //         type='button'
+    //         variant='destructive'
+    //         onClick={createNewLink}
+    //         disabled={loading}
+    //       >
+    //         {loading ? <BeatLoader size={10} color='white' /> : 'Create'}
+    //       </Button>
+    //       <DrawerClose asChild>
+    //         <Button variant='outline'>Cancel</Button>
+    //       </DrawerClose>
+    //     </DrawerFooter>
+    //   </DrawerContent>
+    // </Drawer>
+    <Drawer.Root
+      modal={true}
       defaultOpen={longLink}
       onOpenChange={res => {
         if (!res) {
@@ -176,61 +244,102 @@ export default function CreateLink () {
         }
       }}
     >
-      <DrawerTrigger asChild>
+      <Drawer.Trigger asChild>
         <Button variant='outline'>Create Link</Button>
-      </DrawerTrigger>
-      <DrawerContent className='flex flex-col gap-4 px-2 0'>
-        <DrawerHeader className='text-left'>
-          <DrawerTitle>Create a new Link</DrawerTitle>
-        </DrawerHeader>
-        {formValues?.longUrl && (
-          <QRCode
-            qrStyle='dots'
-            eyeRadius={10}
-            ref={ref}
-            size={250}
-            value={formValues?.longUrl}
-          />
-        )}
-        <Input
-          id='title'
-          placeholder="Short Link's Title"
-          value={formValues.title}
-          onChange={handleChange}
-        />
-        {errors.title && <Error message={errors.title} />}
-        <Input
-          id='longUrl'
-          placeholder='Enter your Loooong URL'
-          value={formValues.longUrl}
-          onChange={handleChange}
-        />
-        {errors.longUrl && <Error message={errors.longUrl} />}
-        <div className='flex items-center gap-2'>
-          <Card className='p-2'>clipr.live</Card> /
-          <Input
-            id='customUrl'
-            placeholder='Custom URL (optional)'
-            value={formValues.customUrl}
-            onChange={handleChange}
-            className='focus:ring-8  focus:ring-red-500'
-          />
-        </div>
-        {error && <Error message={errors.message} />}
-        <DrawerFooter className='pt-2'>
-          <Button
-            type='button'
-            variant='destructive'
-            onClick={createNewLink}
-            disabled={loading}
-          >
-            {loading ? <BeatLoader size={10} color='white' /> : 'Create'}
-          </Button>
-          <DrawerClose asChild>
-            <Button variant='outline'>Cancel</Button>
-          </DrawerClose>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+      </Drawer.Trigger>
+      <Drawer.Portal>
+        <Drawer.Overlay className='fixed inset-0 bg-black/40' />
+        <Drawer.Content className='bg-[#161615] text-white flex flex-col fixed bottom-0 left-0 right-0 max-h-[82vh] rounded-t-[10px]'>
+          <div className='max-w-md w-full mx-auto overflow-auto p-4 rounded-t-[10px]'>
+            <Drawer.Handle />
+            <Drawer.Title className='font-medium text-white mt-8'>
+              Create a new Link
+            </Drawer.Title>
+            <Drawer.Description className='leading-6 mt-2 text-gray-400'>
+              Fill in the information below to create your new link.
+            </Drawer.Description>
+
+            {formValues?.longUrl && (
+              <div className='flex justify-center my-4'>
+                <QRCode
+                  qrStyle='dots'
+                  eyeRadius={10}
+                  ref={ref}
+                  size={150}
+                  value={formValues?.longUrl}
+                />
+              </div>
+            )}
+
+            <Label
+              htmlFor='title'
+              className='font-medium text-white text-sm mt-8 mb-2 block'
+            >
+              Title
+            </Label>
+            <Input
+              id='title'
+              placeholder="Short Link's Title"
+              value={formValues.title}
+              onChange={handleChange}
+              className='border border-gray-200 w-full rounded-lg outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-800'
+            />
+            {errors.title && <Error message={errors.title} />}
+
+            <Label
+              htmlFor='longUrl'
+              className='font-medium text-white text-sm mt-8 mb-2 block'
+            >
+              Long URL
+            </Label>
+            <Input
+              id='longUrl'
+              placeholder='Enter your Loooong URL'
+              value={formValues.longUrl}
+              onChange={handleChange}
+              className='border border-gray-200 w-full rounded-lg outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-800'
+            />
+            {errors.longUrl && <Error message={errors.longUrl} />}
+
+            <Label
+              htmlFor='customUrl'
+              className='font-medium text-white text-sm mt-8 mb-2 block'
+            >
+              Custom URL (optional)
+            </Label>
+            <div className='flex items-center gap-2'>
+              <Badge className='p-2 bg-zinc-600' variant={'outline'}>
+                clipr.live
+              </Badge>{' '}
+              /
+              <Input
+                id='customUrl'
+                placeholder='Custom URL'
+                value={formValues.customUrl}
+                onChange={handleChange}
+                className='border border-gray-200 dark:border-gray-700 w-full rounded-lg outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-800'
+              />
+            </div>
+            {error && <Error message={error.message} />}
+
+            <Button
+              type='button'
+              variant='destructive'
+              onClick={createNewLink}
+              disabled={loading}
+              className={cn('mt-4 w-full', {
+                'cursor-not-allowed': loading
+              })}
+            >
+              {loading ? <BeatLoader size={10} color='white' /> : 'Create'}
+            </Button>
+
+            {/* <Button variant='outline' onClick={handleDrawerClose}>
+              Cancel
+            </Button> */}
+          </div>
+        </Drawer.Content>
+      </Drawer.Portal>
+    </Drawer.Root>
   )
 }
