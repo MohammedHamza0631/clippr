@@ -22,26 +22,18 @@ export async function GET(request, { params }) {
   const parsed = Bowser.parse(userAgent);
   const device = parsed.platform?.type;
 
-  
-  let city = "";
-  let country = "";
-
-  try {
-    const geoResponse = await fetch(`https://ipapi.co/json`);
-    const data = await geoResponse.json();
-    if (data?.city) city = data.city;
-    if (data?.country_name) country = data.country_name;
-  } catch (err) {
-    console.error("Geo lookup failed:", err);
-  }
+  const res = await fetch("https://ipapi.co/json/");
+  const data = await res.json();
+  const city = data.city;
+  const country = data.country_name;
 
   const { error } = await supabase.from("clicks").insert({
     url_id: shortLinkData.id,
-    city,
-    country,
-    device,
+    city: city,
+    country: country,
+    device: device,
   });
-
+  await new Promise((resolve) => setTimeout(resolve, 600));
   if (error) {
     console.error("Error inserting click:", error.message);
     // Decide whether to redirect anyway or show error
