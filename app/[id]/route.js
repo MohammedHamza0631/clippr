@@ -22,8 +22,18 @@ export async function GET(request, { params }) {
   const parsed = Bowser.parse(userAgent);
   const device = parsed.platform?.type;
 
-  const city = request.geo?.city ?? "Unknown";
-  const country = request.geo?.country ?? "Unknown";
+  
+  let city = "";
+  let country = "";
+
+  try {
+    const geoResponse = await fetch(`https://ipapi.co/json`);
+    const data = await geoResponse.json();
+    if (data?.city) city = data.city;
+    if (data?.country_name) country = data.country_name;
+  } catch (err) {
+    console.error("Geo lookup failed:", err);
+  }
 
   const { error } = await supabase.from("clicks").insert({
     url_id: shortLinkData.id,
