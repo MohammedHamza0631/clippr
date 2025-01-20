@@ -40,7 +40,7 @@ export default function Header () {
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className='w-10 mr-2 rounded-full overflow-hidden cursor-pointer object-contain'>
+                <div className='w-10 mr-2 rounded-full overflow-hidden cursor-pointer object-cover'>
                   <Avatar>
                     <AvatarImage src={user?.user_metadata?.profile_pic} />
                     <AvatarFallback>
