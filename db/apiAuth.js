@@ -1,4 +1,4 @@
-import supabase, {supabaseUrl} from "./supabase";
+import supabase, { supabaseUrl } from "./supabase";
 
 export async function login({ email, password }) {
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -12,13 +12,18 @@ export async function login({ email, password }) {
 }
 
 export async function signup({ name, email, password, profile_pic }) {
-  const fileName = `dp-${name.split(" ").join("-")}-${Math.random()}`;
+  let profile_pic_url = null;
+  if (profile_pic_url) {
+    const fileName = `dp-${name.split(" ").join("-")}-${Math.random()}`;
 
-  const { error: storageError } = await supabase.storage
-    .from("profile_pic")
-    .upload(fileName, profile_pic);
+    const { error: storageError } = await supabase.storage
+      .from("profile_pic")
+      .upload(fileName, profile_pic);
 
-  if (storageError) throw new Error(storageError.message);
+    if (storageError) throw new Error(storageError.message);
+
+    profile_pic_url = `${supabaseUrl}/storage/v1/object/public/profile_pic/${fileName}`;
+  }
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -26,7 +31,7 @@ export async function signup({ name, email, password, profile_pic }) {
     options: {
       data: {
         name,
-        profile_pic: `${supabaseUrl}/storage/v1/object/public/profile_pic/${fileName}`,
+        profile_pic: profile_pic_url,
       },
     },
   });
@@ -47,13 +52,11 @@ export async function getCurrentUser() {
 }
 
 export async function logout() {
-  const {error} = await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
   if (error) throw new Error(error.message);
 }
 
 export async function forgotPassword(email) {
   const { error } = await supabase.auth.api.resetPasswordForEmail(email);
   if (error) throw new Error(error.message);
-
-  
 }

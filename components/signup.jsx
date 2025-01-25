@@ -58,7 +58,7 @@ export default function Signup () {
         password: Yup.string()
           .min(6, 'Password must be at least 6 characters')
           .required('Password is required'),
-        profile_pic: Yup.mixed().required('Profile picture is required')
+        profile_pic: Yup.mixed().nullable(),
       })
 
       await schema.validate(formData, { abortEarly: false })
