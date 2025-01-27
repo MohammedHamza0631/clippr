@@ -136,6 +136,7 @@ export default function Header () {
                       onClick={() => {
                         fnLogout().then(() => {
                           fetchUser()
+                          setDrawerOpen(false)
                           router.replace('/')
                         })
                       }}
