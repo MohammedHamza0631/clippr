@@ -1,14 +1,8 @@
-'use client'
+import React, { forwardRef } from 'react'
 import Image from 'next/image'
 
-export default function LazyImage ({ src, alt }) {
-  return (
-    <Image
-      src={src}
-      alt={alt}
-      width={200}
-      height={200}
-      className='rounded-lg'
-    />
-  )
-}
+const LazyImage = forwardRef(({ src, alt }, ref) => (
+  <Image src={src} alt={alt} width={200} height={200} className='rounded-lg' />
+))
+
+export default React.memo(LazyImage)

@@ -188,6 +188,7 @@ const LinkPage = ({ params }) => {
               )}
             </Button>
           </div>
+
           <Suspense fallback='QR code Loading...'>
             <LazyImage src={url?.qr_code} alt='QR Code' />
           </Suspense>
