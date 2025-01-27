@@ -10,7 +10,7 @@ import DeviceStats from '@/components/device-stats'
 import { getClicksForUrl } from '@/db/apiClicks'
 import { deleteUrl, getUrl } from '@/db/apiUrls'
 import { Copy, Download, LinkIcon, Trash, Check } from 'lucide-react'
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, Suspense, lazy } from 'react'
 import { BarLoader, BeatLoader } from 'react-spinners'
 import { useRouter } from 'next/navigation'
 import React from 'react'
@@ -20,6 +20,7 @@ const LinkPage = ({ params }) => {
   const { id } = params
   const { user } = UrlState()
   const router = useRouter()
+  const LazyImage = lazy(() => import('@/components/LazyImage'))
   const [copied, setCopied] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)

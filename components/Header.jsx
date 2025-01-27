@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem
 } from '@/components/ui/dropdown-menu'
+import useMediaQuery from '@/hooks/use-media-query'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Image from 'next/image'
@@ -21,17 +22,19 @@ import { Drawer } from 'vaul'
 import { UrlState } from '@/context/url-provider'
 import useFetch from '@/hooks/use-fetch'
 import { logout } from '@/db/apiAuth'
+import { useState } from 'react'
 
 export default function Header () {
   const router = useRouter()
-  const { user, fetchUser } = UrlState()
   const isDesktop = useMediaQuery('(min-width: 768px)')
+  const { user, fetchUser } = UrlState()
+
   const { loading, fn: fnLogout } = useFetch(logout)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
   return (
-    <>
+    <div>
       <nav className='px-8 py-2 flex justify-between items-center'>
         <Link href='/'>
           <h1 className='text-2xl font-dancing font-extrabold'>Clippr</h1>
@@ -153,6 +156,6 @@ export default function Header () {
         </div>
       </nav>
       {loading && <BarLoader className='mb-4' width={'100%'} color='#36d7b7' />}
-    </>
+    </div>
   )
 }
