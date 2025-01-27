@@ -27,12 +27,7 @@ export default function Header () {
     <>
       <nav className='px-6 py-2 flex justify-between items-center'>
         <Link href='/'>
-          <Image
-            src='/finallogo.png'
-            height={100}
-            width={100}
-            alt='Clippr Logo'
-          />
+          <h1 className='text-2xl font-dancing font-extrabold'>Clippr</h1>
         </Link>
         <div className='flex gap-4'>
           {!user ? (
