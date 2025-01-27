@@ -4,7 +4,7 @@ import { UrlState } from '@/context/url-provider'
 import useFetch from '@/hooks/use-fetch'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from '@/components/ui/skeleton'
 import LocationStats from '@/components/location-stats'
 import DeviceStats from '@/components/device-stats'
 import { getClicksForUrl } from '@/db/apiClicks'
@@ -123,10 +123,15 @@ const LinkPage = ({ params }) => {
           <a
             href={url?.original_url}
             target='_blank'
-            className='flex text-wrap text-sm md:text-lg items-center gap-1 hover:underline cursor-pointer'
+            className='flex text-sm md:text-lg items-center gap-1 hover:underline cursor-pointer'
           >
             <LinkIcon className='p-1' />
-            {url?.original_url}
+            <span
+              className='break-all'
+              style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
+            >
+              {url?.original_url}
+            </span>
           </a>
           <span className='flex items-end font-extralight text-xs md:text-sm'>
             {url?.created_at ? new Date(url.created_at).toLocaleString() : null}
@@ -193,7 +198,7 @@ const LinkPage = ({ params }) => {
           <div className='relative'>
             {!imageLoaded && (
               <div>
-                <Skeleton className="h-[250px] w-[250px] rounded-xl" />
+                <Skeleton className='h-[250px] w-[250px] rounded-xl' />
               </div>
             )}
             <img
