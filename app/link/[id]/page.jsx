@@ -9,7 +9,7 @@ import DeviceStats from '@/components/device-stats'
 import { getClicksForUrl } from '@/db/apiClicks'
 import { deleteUrl, getUrl } from '@/db/apiUrls'
 import { Copy, Download, LinkIcon, Trash, Check } from 'lucide-react'
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, Suspense, lazy } from 'react'
 import { BarLoader, BeatLoader } from 'react-spinners'
 import { useRouter } from 'next/navigation'
 import React from 'react'
@@ -18,6 +18,7 @@ const LinkPage = ({ params }) => {
   const { id } = params
   const { user } = UrlState()
   const router = useRouter()
+  const LazyImage = lazy(() => import('@/components/LazyImage'))
   const [copied, setCopied] = useState(false)
   const [downloading, setDownloading] = useState(false)
 
@@ -112,7 +113,7 @@ const LinkPage = ({ params }) => {
               href={`https://clipr.vercel.app/${link}`}
               target='_blank'
               rel='noreferrer'
-              className='text-3xl sm:text-4xl text-blue-400 font-bold hover:underline'
+              className='text-xl sm:text-4xl text-blue-400 font-bold hover:underline'
             >
               https://clipr.vercel.app/{link}
             </a>
@@ -120,7 +121,7 @@ const LinkPage = ({ params }) => {
           <a
             href={url?.original_url}
             target='_blank'
-            className='flex items-center gap-1 hover:underline cursor-pointer'
+            className='flex items-center text-md gap-1 hover:underline cursor-pointer'
           >
             <LinkIcon className='p-1' />
             {url?.original_url}
@@ -188,11 +189,7 @@ const LinkPage = ({ params }) => {
             </Button>
           </div>
           <Suspense fallback='QR code Loading...'>
-            <img
-              src={url?.qr_code}
-              className='w-full self-center sm:self-start ring ring-blue-500 p-1 object-contain'
-              alt='qr code'
-            />
+            <LazyImage src={url?.qr_code} alt='QR Code' />
           </Suspense>
         </div>
 
