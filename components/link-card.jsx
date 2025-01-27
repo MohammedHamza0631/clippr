@@ -73,7 +73,7 @@ export default function LinkCard ({ url, fetchUrls }) {
         <span className='object-contain text-lg md:text-2xl text-blue-400 md:font-bold hover:underline cursor-pointer'>
           https://clipr.vercel.app/{url?.custom_url ? url?.custom_url : url.short_url}
         </span>
-        <span className='flex text-wrap text-sm md:text-lg items-center gap-1 hover:underline cursor-pointer'>
+        <span className='flex break-all text-sm md:text-lg items-center gap-1 hover:underline cursor-pointer' style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
           <LinkIcon className='p-1' />
           {url?.original_url}
         </span>
