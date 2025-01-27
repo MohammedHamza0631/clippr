@@ -12,10 +12,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem
 } from '@/components/ui/dropdown-menu'
-import useMediaQuery from '@/hooks/use-media-query'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import Image from 'next/image'
 import { useState } from 'react'
 import useMediaQuery from '@/hooks/use-media-query'
 import { Drawer } from 'vaul'
@@ -31,7 +29,6 @@ export default function Header () {
 
   const { loading, fn: fnLogout } = useFetch(logout)
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [dropdownOpen, setDropdownOpen] = useState(false)
 
   return (
     <div>

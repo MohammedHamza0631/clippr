@@ -20,7 +20,6 @@ const LinkPage = ({ params }) => {
   const { id } = params
   const { user } = UrlState()
   const router = useRouter()
-  const LazyImage = lazy(() => import('@/components/LazyImage'))
   const [copied, setCopied] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
