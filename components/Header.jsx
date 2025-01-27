@@ -20,7 +20,6 @@ import { Drawer } from 'vaul'
 import { UrlState } from '@/context/url-provider'
 import useFetch from '@/hooks/use-fetch'
 import { logout } from '@/db/apiAuth'
-import { useState } from 'react'
 
 export default function Header () {
   const router = useRouter()
