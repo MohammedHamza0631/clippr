@@ -4,6 +4,7 @@ import { UrlState } from '@/context/url-provider'
 import useFetch from '@/hooks/use-fetch'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from "@/components/ui/skeleton"
 import LocationStats from '@/components/location-stats'
 import DeviceStats from '@/components/device-stats'
 import { getClicksForUrl } from '@/db/apiClicks'
@@ -13,6 +14,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { BarLoader, BeatLoader } from 'react-spinners'
 import { useRouter } from 'next/navigation'
 import React from 'react'
+import Link from 'next/link'
 
 const LinkPage = ({ params }) => {
   const { id } = params
@@ -20,6 +22,7 @@ const LinkPage = ({ params }) => {
   const router = useRouter()
   const [copied, setCopied] = useState(false)
   const [downloading, setDownloading] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   const {
     loading,
@@ -104,7 +107,7 @@ const LinkPage = ({ params }) => {
       )}
       <div className='flex flex-col gap-8 sm:flex-row justify-between'>
         <div className='flex flex-col items-start gap-8 rounded-lg sm:w-2/5'>
-          <span className='text-6xl font-extrabold hover:underline cursor-pointer'>
+          <span className='text-3xl md:text-4xl font-extrabold hover:underline cursor-pointer'>
             {url?.title}
           </span>
           {link && (
@@ -112,7 +115,7 @@ const LinkPage = ({ params }) => {
               href={`https://clipr.vercel.app/${link}`}
               target='_blank'
               rel='noreferrer'
-              className='text-3xl sm:text-4xl text-blue-400 font-bold hover:underline'
+              className='text-lg md:text-2xl text-blue-400 font-bold hover:underline'
             >
               https://clipr.vercel.app/{link}
             </a>
@@ -120,12 +123,12 @@ const LinkPage = ({ params }) => {
           <a
             href={url?.original_url}
             target='_blank'
-            className='flex items-center gap-1 hover:underline cursor-pointer'
+            className='flex text-wrap text-sm md:text-lg items-center gap-1 hover:underline cursor-pointer'
           >
             <LinkIcon className='p-1' />
             {url?.original_url}
           </a>
-          <span className='flex items-end font-extralight text-sm'>
+          <span className='flex items-end font-extralight text-xs md:text-sm'>
             {url?.created_at ? new Date(url.created_at).toLocaleString() : null}
           </span>
           <div className='flex gap-2'>
@@ -187,18 +190,28 @@ const LinkPage = ({ params }) => {
               )}
             </Button>
           </div>
-          <Suspense fallback='QR code Loading...'>
+          <div className='relative'>
+            {!imageLoaded && (
+              <div>
+                <Skeleton className="h-[250px] w-[250px] rounded-xl" />
+              </div>
+            )}
             <img
               src={url?.qr_code}
-              className='w-full self-center sm:self-start ring ring-blue-500 p-1 object-contain'
+              className={`w-full self-center sm:self-start rounded-md ring ring-blue-500 p-1 object-contain transition-opacity duration-300 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
               alt='qr code'
+              onLoad={() => setImageLoaded(true)}
             />
-          </Suspense>
+          </div>
         </div>
 
         <Card className='sm:w-3/5'>
           <CardHeader>
-            <CardTitle className='text-4xl font-extrabold'>Stats</CardTitle>
+            <CardTitle className='text-3xl md:text-4xl font-extrabold'>
+              Stats
+            </CardTitle>
           </CardHeader>
           {stats && stats.length ? (
             <CardContent className='flex flex-col gap-6'>

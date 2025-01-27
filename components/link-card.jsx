@@ -14,7 +14,7 @@ export default function LinkCard ({ url, fetchUrls }) {
 
   const downloadImage = async () => {
     const imageUrl = url?.qr_code
-    const fileName = url?.title // Desired file name for the downloaded image
+    const fileName = url?.title 
     if (!imageUrl) {
       console.error('Image URL is missing.')
       return
@@ -63,21 +63,21 @@ export default function LinkCard ({ url, fetchUrls }) {
     <div className='flex flex-col md:flex-row gap-5 border p-4 bg-zinc-900 rounded-lg'>
       <img
         src={url?.qr_code}
-        className='h-32 object-contain ring ring-blue-500 self-start rounded-lg backdrop-filter backdrop-blur-md'
+        className='h-32 object-contain ring ring-blue-500 self-center md:self-start rounded-lg backdrop-filter backdrop-blur-md'
         alt='qr code'
       />
       <Link href={`/link/${url?.id}`} className='flex flex-col flex-1 gap-2'>
         <span className='text-2xl md:text-3xl font-extrabold hover:underline cursor-pointer'>
           {url?.title}
         </span>
-        <span className='object-contain text-2xl text-blue-400 md:font-bold hover:underline cursor-pointer'>
+        <span className='object-contain text-lg md:text-2xl text-blue-400 md:font-bold hover:underline cursor-pointer'>
           https://clipr.vercel.app/{url?.custom_url ? url?.custom_url : url.short_url}
         </span>
-        <span className='flex text-sm md:text-lg items-center gap-1 hover:underline cursor-pointer'>
+        <span className='flex text-wrap text-sm md:text-lg items-center gap-1 hover:underline cursor-pointer'>
           <LinkIcon className='p-1' />
           {url?.original_url}
         </span>
-        <span className='flex items-end font-extralight text-sm flex-1'>
+        <span className='flex items-end font-extralight text-xs md:text-sm flex-1'>
           {new Date(url?.created_at).toLocaleString()}
         </span>
       </Link>
