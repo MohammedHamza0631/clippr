@@ -1,6 +1,8 @@
 'use client'
 import Login from '@/components/login'
 import Signup from '@/components/signup'
+import SignupFormDemo from '@/components/signup-form-demo'
+import LoginFormDemo from '@/components/login-form-demo'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import React, { useEffect } from 'react'
 import { UrlState } from '@/context/url-provider'
@@ -26,10 +28,10 @@ const AuthPage = () => {
           <TabsTrigger value='signup'>Signup</TabsTrigger>
         </TabsList>
         <TabsContent value='login'>
-          <Login />
+          <LoginFormDemo />
         </TabsContent>
         <TabsContent value='signup'>
-          <Signup />
+          <SignupFormDemo />
         </TabsContent>
       </Tabs>
     </div>

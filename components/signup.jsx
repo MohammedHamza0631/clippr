@@ -80,7 +80,7 @@ export default function Signup () {
     <Card>
       <CardHeader>
         <CardTitle>Signup</CardTitle>
-        <CardDescription>
+        <CardDescription className='text-neutral-400'>
           Create a new account if you haven&rsquo;t already
         </CardDescription>
         {error && <Error message={error?.message} />}
@@ -91,6 +91,7 @@ export default function Signup () {
             name='name'
             type='text'
             placeholder='Enter Name'
+            className='rounded-lg border border-neutral-800 w-full  bg-neutral-950 placeholder:text-neutral-700'
             onChange={handleInputChange}
           />
         </div>
@@ -100,6 +101,7 @@ export default function Signup () {
             name='email'
             type='email'
             placeholder='Enter Email'
+            className='rounded-lg border border-neutral-800 w-full  bg-neutral-950 placeholder:text-neutral-700'
             onChange={handleInputChange}
           />
         </div>
@@ -108,7 +110,8 @@ export default function Signup () {
           <Input
             name='password'
             type='password'
-            placeholder='Enter Password'
+            placeholder='••••••••'
+            className='rounded-lg border border-neutral-800 w-full  bg-neutral-950 placeholder:text-neutral-700'
             onChange={handleInputChange}
           />
         </div>
@@ -118,6 +121,8 @@ export default function Signup () {
             name='profile_pic'
             type='file'
             accept='image/*'
+            className='rounded-lg border border-neutral-800 w-full bg-neutral-950 placeholder:text-neutral-400'
+            placeholder='Upload Profile Picture'
             onChange={handleInputChange}
           />
         </div>
@@ -135,3 +140,24 @@ export default function Signup () {
     </Card>
   )
 }
+
+const BottomGradient = () => {
+  return (<>
+    <span
+      className="group-hover/btn:opacity-100 block transition duration-500 opacity-0 absolute h-px w-full -bottom-px inset-x-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+    <span
+      className="group-hover/btn:opacity-100 blur-sm block transition duration-500 opacity-0 absolute h-px w-1/2 mx-auto -bottom-px inset-x-10 bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
+  </>);
+};
+
+const LabelInputContainer = ({
+  children,
+  className
+}) => {
+  return (
+    (<div className={cn("flex flex-col space-y-2 w-full", className)}>
+      {children}
+    </div>)
+  );
+};
+

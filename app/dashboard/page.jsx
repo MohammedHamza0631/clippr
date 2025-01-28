@@ -72,6 +72,7 @@ export default function Dashboard () {
           type='text'
           placeholder='Filter Links...'
           value={searchQuery}
+          className='text-neutral-300 bg-neutral-950 '
           onChange={e => setSearchQuery(e.target.value)}
         />
         <Filter className='absolute top-2 right-2 p-1' />

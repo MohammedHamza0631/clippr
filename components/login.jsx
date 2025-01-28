@@ -84,7 +84,7 @@ export default function Login () {
             name='email'
             type='email'
             placeholder='Enter Email'
-            className='rounded-lg border border-neutral-800 focus:ring-2 focus:ring-teal-500 w-full  bg-neutral-950 placeholder:text-neutral-700'
+            className='text-neutral-300 rounded-lg border border-neutral-800 focus:ring-2 focus:ring-teal-500 w-full  bg-neutral-950 placeholder:text-neutral-700'
             onChange={handleInputChange}
           />
         </div>
@@ -94,7 +94,7 @@ export default function Login () {
             name='password'
             type='password'
             placeholder='Enter Password'
-            className='rounded-lg border border-neutral-800 focus:ring-2 focus:ring-teal-500 w-full  bg-neutral-950 placeholder:text-neutral-700'
+            className='text-neutral-300 rounded-lg border border-neutral-800 focus:ring-2 focus:ring-teal-500 w-full  bg-neutral-950 placeholder:text-neutral-700'
             onChange={handleInputChange}
           />
         </div>

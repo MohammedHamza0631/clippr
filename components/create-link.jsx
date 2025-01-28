@@ -131,6 +131,7 @@ export default function CreateLink ({ fetchUrls }) {
             id='title'
             placeholder="Short Link's Title"
             value={formValues.title}
+            className='bg-zinc-950 text-neutral-300'
             onChange={handleChange}
           />
           {errors.title && <Error message={errors.title} />}
@@ -138,6 +139,7 @@ export default function CreateLink ({ fetchUrls }) {
             id='longUrl'
             placeholder='Enter your Loooong URL'
             value={formValues.longUrl}
+            className='bg-zinc-950 text-neutral-300'
             onChange={handleChange}
           />
           {errors.longUrl && <Error message={errors.longUrl} />}
@@ -147,6 +149,7 @@ export default function CreateLink ({ fetchUrls }) {
               id='customUrl'
               placeholder='Custom Link (optional)'
               value={formValues.customUrl}
+              className='bg-zinc-950 text-neutral-300'
               onChange={handleChange}
             />
           </div>
@@ -167,74 +170,6 @@ export default function CreateLink ({ fetchUrls }) {
   }
 
   return (
-    // <Drawer
-    //   defaultOpen={longLink}
-    //   onOpenChange={res => {
-    //     if (!res) {
-    //       router.push('/dashboard')
-    //     }
-    //   }}
-    // >
-    //   <DrawerTrigger asChild>
-    //     <Button variant='outline'>Create Link</Button>
-    //   </DrawerTrigger>
-    //   <DrawerContent className='flex flex-col gap-4 px-2 overflow-y-auto max-h-[90vh]'>
-    //     <DrawerHeader className='text-left'>
-    //       <DrawerTitle>Create a new Link</DrawerTitle>
-    //     </DrawerHeader>
-    //     <div className='flex flex-col gap-4'>
-    //       <Input
-    //         id='title'
-    //         placeholder="Short Link's Title"
-    //         value={formValues.title}
-    //         onChange={handleChange}
-    //       />
-    //       {errors.title && <Error message={errors.title} />}
-    //       <Input
-    //         id='longUrl'
-    //         placeholder='Enter your Loooong URL'
-    //         value={formValues.longUrl}
-    //         onChange={handleChange}
-    //       />
-    //       {errors.longUrl && <Error message={errors.longUrl} />}
-    //       <div className='flex items-center gap-2'>
-    //         <Card className='p-2'>clipr.live</Card> /
-    //         <Input
-    //           id='customUrl'
-    //           placeholder='Custom URL (optional)'
-    //           value={formValues.customUrl}
-    //           onChange={handleChange}
-    //           className='focus:ring-8 focus:ring-red-500'
-    //         />
-    //       </div>
-    //       {formValues?.longUrl && (
-    //         <div className='flex justify-center'>
-    //           <QRCode
-    //             qrStyle='dots'
-    //             eyeRadius={10}
-    //             ref={ref}
-    //             size={250}
-    //             value={formValues?.longUrl}
-    //           />
-    //         </div>
-    //       )}
-    //     </div>
-    //     {error && <Error message={errors.message} />}
-    //     <DrawerFooter className='pt-2'>
-    //       <Button
-    //         type='button'
-    //         variant='destructive'
-    //         onClick={createNewLink}
-    //         disabled={loading}
-    //       >
-    //         {loading ? <BeatLoader size={10} color='white' /> : 'Create'}
-    //       </Button>
-    //       <DrawerClose asChild>
-    //         <Button variant='outline'>Cancel</Button>
-    //       </DrawerClose>
-    //     </DrawerFooter>
-    //   </DrawerContent>
-    // </Drawer>
     <Drawer.Root
       modal={true}
       defaultOpen={longLink}
@@ -282,7 +217,7 @@ export default function CreateLink ({ fetchUrls }) {
               placeholder="Short Link's Title"
               value={formValues.title}
               onChange={handleChange}
-              className='border border-gray-200 w-full rounded-lg outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-800'
+              className='border border-gray-200 w-full rounded-lg outline-none focus:ring-2 focus:ring-gray-500 bg-zinc-950 text-neutral-300'
             />
             {errors.title && <Error message={errors.title} />}
 
@@ -297,7 +232,7 @@ export default function CreateLink ({ fetchUrls }) {
               placeholder='Enter your Loooong URL'
               value={formValues.longUrl}
               onChange={handleChange}
-              className='border border-gray-200 w-full rounded-lg outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-800'
+              className='bg-zinc-950 text-neutral-300 border border-gray-200 w-full rounded-lg outline-none focus:ring-2 focus:ring-gray-500'
             />
             {errors.longUrl && <Error message={errors.longUrl} />}
 
@@ -317,7 +252,7 @@ export default function CreateLink ({ fetchUrls }) {
                 placeholder='Custom URL'
                 value={formValues.customUrl}
                 onChange={handleChange}
-                className='border border-gray-200 dark:border-gray-700 w-full rounded-lg outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-800'
+                className='bg-zinc-950 text-neutral-300 border border-gray-200 dark:border-gray-700 w-full rounded-lg outline-none focus:ring-2 focus:ring-gray-500'
               />
             </div>
             {error && <Error message={error.message} />}
