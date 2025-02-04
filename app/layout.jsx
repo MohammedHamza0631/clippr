@@ -35,7 +35,7 @@ export default function RootLayout ({ children }) {
         <UrlProvider>
           <Header />
          
-          <main className='mt-20 min-h-screen container mx-auto px-6'>
+          <main className='mt-20 min-h-screen container mx-auto px-2'>
             {children}
           </main>
           <Footer />

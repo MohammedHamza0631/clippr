@@ -105,7 +105,7 @@ const LinkPage = ({ params }) => {
       {(loading || loadingStats) && (
         <BarLoader className='mb-4' width={'100%'} color='#36d7b7' />
       )}
-      <div className='flex flex-col gap-8 sm:flex-row justify-between'>
+      <div className='flex flex-col gap-8 sm:flex-row justify-between px-6'>
         <div className='flex flex-col items-start gap-8 rounded-lg sm:w-2/5'>
           <span className='text-3xl md:text-4xl font-extrabold hover:underline cursor-pointer'>
             {url?.title}
