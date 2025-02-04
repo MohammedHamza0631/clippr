@@ -34,8 +34,8 @@ export default function RootLayout ({ children }) {
       >
         <UrlProvider>
           <Header />
-          <Separator className='mb-4' />
-          <main className='min-h-screen container mx-auto px-6'>
+         
+          <main className='mt-20 min-h-screen container mx-auto px-6'>
             {children}
           </main>
           <Footer />
