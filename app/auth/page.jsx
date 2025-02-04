@@ -18,11 +18,11 @@ const AuthPage = () => {
       router.push(`/dashboard?${longLink ? `createNew=${longLink}` : ''}`)
   }, [isAuthenticated, loading, router])
   return (
-    <div className='mt-36 flex flex-col items-center gap-10'>
-      <h1 className='text-5xl font-extrabold'>
+    <div className='mt-36 flex flex-col items-center gap-10 px-8'>
+      <h1 className='text-4xl md:text-5xl font-extrabold'>
         {longLink ? 'Please Sign in first' : 'Login/Signup'}
       </h1>
-      <Tabs defaultValue='login' className='w-[400px]'>
+      <Tabs defaultValue='login' className='w-[300px] md:w-[500px]'>
         <TabsList className='grid w-full grid-cols-2'>
           <TabsTrigger value='login'>Login</TabsTrigger>
           <TabsTrigger value='signup'>Signup</TabsTrigger>

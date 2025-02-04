@@ -129,7 +129,7 @@ export default function LoginFormDemo () {
 
             <BottomGradient />
                   </button>
-                  {<span className='text-xs text-red-600'>Login with Google is not supported yet</span>}
+                  {<span className='text-center font-medium bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 to-rose-300'>Coming Soon!!</span>}
         </div>
       </div>
     </div>
