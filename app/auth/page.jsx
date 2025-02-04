@@ -1,6 +1,4 @@
 'use client'
-import Login from '@/components/login'
-import Signup from '@/components/signup'
 import SignupFormDemo from '@/components/signup-form-demo'
 import LoginFormDemo from '@/components/login-form-demo'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
