@@ -60,7 +60,7 @@ export default function LinkCard ({ url, fetchUrls }) {
   const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, url.id)
 
   return (
-    <div className='flex flex-col md:flex-row gap-5 border p-4 bg-zinc-900 rounded-lg'>
+    <div className='flex flex-col md:flex-row gap-5 border p-4 hover:bg-zinc-900 transition-all duration-300 rounded-lg'>
       <img
         src={url?.qr_code}
         className='h-32 object-contain ring ring-blue-500 self-center md:self-start rounded-lg backdrop-filter backdrop-blur-md'

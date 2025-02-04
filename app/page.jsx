@@ -22,12 +22,12 @@ export default function Home () {
       </h1>
       <div className=''>
         <form onSubmit={handleShorten} className='flex flex-col md:flex-row max-w-2xl mx-auto p-4 gap-4'>
-          <input
+          <Input
             type='url'
             placeholder='Enter your looong URL!!'
             value={longUrl}
             onChange={e => setLongUrl(e.target.value)}
-            className='rounded-lg border border-neutral-800 focus:ring-2 focus:ring-teal-500 w-full  bg-neutral-950 placeholder:text-neutral-700 placeholder:p-1'
+            className='rounded-lg border border-neutral-800 focus:ring-2 focus:ring-teal-500 w-full  bg-neutral-900 placeholder:text-neutral-700 placeholder:p-1'
           />
           <Button type='submit'>Shorten</Button>
         </form>

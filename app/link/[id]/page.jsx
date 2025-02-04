@@ -203,7 +203,7 @@ const LinkPage = ({ params }) => {
             )}
             <img
               src={url?.qr_code}
-              className={`w-full self-center sm:self-start rounded-md ring ring-blue-500 p-1 object-contain transition-opacity duration-300 ${
+              className={`w-full self-center sm:self-start rounded-lg ring ring-blue-500 p-1 object-contain transition-opacity duration-300 ${
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               }`}
               alt='qr code'

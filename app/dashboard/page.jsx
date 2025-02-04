@@ -46,7 +46,7 @@ export default function Dashboard () {
         <BarLoader width={'100%'} color='#36d7b7' />
       )}
       <div className='grid grid-cols-2 gap-4'>
-        <Card>
+        <Card className='hover:shadow-lg hover:bg-zinc-900 transition-all duration-300'>
           <CardHeader>
             <CardTitle>Links Created</CardTitle>
           </CardHeader>
@@ -54,7 +54,7 @@ export default function Dashboard () {
             <p>{urls?.length}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className='hover:shadow-lg hover:bg-zinc-900 transition-all duration-300'>
           <CardHeader>
             <CardTitle>Total Clicks</CardTitle>
           </CardHeader>
@@ -72,7 +72,7 @@ export default function Dashboard () {
           type='text'
           placeholder='Filter Links...'
           value={searchQuery}
-          className='text-neutral-300 bg-neutral-950 '
+          className='text-neutral-300 bg-neutral-900'
           onChange={e => setSearchQuery(e.target.value)}
         />
         <Filter className='absolute top-2 right-2 p-1' />

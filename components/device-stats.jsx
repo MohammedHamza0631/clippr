@@ -105,7 +105,7 @@ const DeviceStats = ({ stats }) => {
                             y={(viewBox.cy || 0) + 24}
                             className='fill-muted-foreground'
                           >
-                            Devices
+                            Visitors
                           </tspan>
                         </text>
                       )

@@ -29,6 +29,7 @@ import { Label } from '@/components/ui/label'
 import { useRouter, useSearchParams } from 'next/navigation'
 import VaulDrawer from '@/components/ui/vaul-drawer'
 import { Drawer } from 'vaul'
+import { ShimmerButton } from './ui/shimmer-button'
 
 export default function CreateLink ({ fetchUrls }) {
   const isDesktop = useMediaQuery('(min-width: 768px)')
@@ -112,7 +113,12 @@ export default function CreateLink ({ fetchUrls }) {
         }}
       >
         <DialogTrigger asChild>
-          <Button variant='outline'>Create Link</Button>
+       
+          <ShimmerButton className='shadow-2xl'>
+            <span className='whitespace-pre-wrap text-center text-xs leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg'>
+              Create Link
+            </span>
+          </ShimmerButton>
         </DialogTrigger>
         <DialogContent className='sm:max-w-[425px]'>
           <DialogHeader>
