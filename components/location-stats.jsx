@@ -94,14 +94,7 @@ export default function LocationStats({ stats = [] }) {
           </ResponsiveContainer>
         </div>
 
-        <div className="mt-6 space-y-2">
-          {chartData.map((item, index) => (
-            <div key={index} className="flex items-center justify-between">
-              <span className="text-sm text-white/80">{item.city}</span>
-              <span className="text-sm font-medium text-white/90">{item.count} clicks</span>
-            </div>
-          ))}
-        </div>
+        
       </CardContent>
     </Card>
   )
