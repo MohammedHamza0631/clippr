@@ -108,7 +108,7 @@ const LinkPage = ({ params }) => {
           className='space-y-6'
         >
           <div className='bg-white/[0.02] border border-white/[0.08] rounded-lg p-6 space-y-6'>
-            <h1 className='text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-white/90 to-rose-300'>
+            <h1 className='text-3xl font-bold '>
               {url?.title}
             </h1>
 
@@ -195,7 +195,7 @@ const LinkPage = ({ params }) => {
         >
           <Card className='bg-white/[0.02] border-white/[0.08]'>
             <CardHeader>
-              <CardTitle className='text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-white/90 to-rose-300'>
+              <CardTitle className='text-2xl font-bold '>
                 Analytics Overview
               </CardTitle>
             </CardHeader>

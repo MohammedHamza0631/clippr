@@ -1,13 +1,10 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { TrendingUp } from 'lucide-react'
 import { Pie, PieChart, Label } from 'recharts'
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle
 } from '@/components/ui/card'
@@ -19,11 +16,11 @@ import {
 } from '@/components/ui/chart'
 
 const COLORS = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))'
+  'hsl(220, 70%, 50%)',  // Indigo
+  'hsl(345, 80%, 50%)',  // Rose
+  'hsl(190, 90%, 50%)',  // Cyan
+  'hsl(43, 96%, 56%)',   // Amber
+  'hsl(142, 71%, 45%)'   // Emerald
 ]
 
 const DeviceStats = ({ stats }) => {
@@ -61,63 +58,78 @@ const DeviceStats = ({ stats }) => {
   }, [deviceData])
 
   return (
-    <div>
-      <Card className='flex flex-col'>
-        <CardHeader className='items-center pb-0'>
-          <CardTitle>Device Statistics</CardTitle>
-        </CardHeader>
-        <CardContent className='flex-1 pb-0'>
-          <ChartContainer
-            config={chartConfig}
-            className='mx-auto aspect-square max-h-[250px]'
-          >
-            <PieChart>
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
-              <Pie
-                data={deviceData}
-                dataKey='count'
-                nameKey='device'
-                innerRadius={60}
-                strokeWidth={5}
-              >
-                <Label
-                  content={({ viewBox }) => {
-                    if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
-                      return (
-                        <text
+    <Card className="bg-white/[0.02] border-white/[0.08]">
+      <CardHeader>
+        <CardTitle className="text-lg font-semibold text-white/90">Device Distribution</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer
+          config={chartConfig}
+          className="mx-auto aspect-square max-h-[300px]"
+        >
+          <PieChart>
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
+            />
+            <Pie
+              data={deviceData}
+              dataKey="count"
+              nameKey="device"
+              innerRadius={60}
+              outerRadius={80}
+              strokeWidth={4}
+              paddingAngle={2}
+            >
+              <Label
+                content={({ viewBox }) => {
+                  if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
+                    return (
+                      <text
+                        x={viewBox.cx}
+                        y={viewBox.cy}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                      >
+                        <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
-                          textAnchor='middle'
-                          dominantBaseline='middle'
+                          className="fill-white text-3xl font-bold"
                         >
-                          <tspan
-                            x={viewBox.cx}
-                            y={viewBox.cy}
-                            className='fill-foreground text-3xl font-bold'
-                          >
-                            {totalDevices}
-                          </tspan>
-                          <tspan
-                            x={viewBox.cx}
-                            y={(viewBox.cy || 0) + 24}
-                            className='fill-muted-foreground'
-                          >
-                            Visitors
-                          </tspan>
-                        </text>
-                      )
-                    }
-                  }}
+                          {totalDevices}
+                        </tspan>
+                        <tspan
+                          x={viewBox.cx}
+                          y={(viewBox.cy || 0) + 24}
+                          className="fill-white/60 text-sm"
+                        >
+                          Total Clicks
+                        </tspan>
+                      </text>
+                    )
+                  }
+                }}
+              />
+            </Pie>
+          </PieChart>
+        </ChartContainer>
+
+        <div className="mt-6 space-y-2">
+          {deviceData.map((item, index) => (
+            <div key={index} className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div 
+                  className="h-3 w-3 rounded-full" 
+                  style={{ backgroundColor: item.fill }}
                 />
-              </Pie>
-            </PieChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-    </div>
+                <span className="text-sm text-white/80">{item.device}</span>
+              </div>
+              <span className="text-sm font-medium text-white/90">{item.count}</span>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
