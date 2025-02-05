@@ -22,7 +22,7 @@ import useFetch from '@/hooks/use-fetch'
 import { logout } from '@/db/apiAuth'
 import { motion } from 'framer-motion'
 
-export default function Header() {
+export default function Header () {
   const router = useRouter()
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const { user, fetchUser } = UrlState()
@@ -30,16 +30,12 @@ export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   return (
-    <motion.div
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <motion.div>
       <nav className='fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[#030303]/80 border-b border-white/[0.08]'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
           <div className='flex justify-between items-center h-16'>
             <Link href='/'>
-              <motion.h1 
+              <motion.h1
                 className='text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-white/90 to-rose-300 font-dancing'
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.2 }}
@@ -49,9 +45,9 @@ export default function Header() {
             </Link>
             <div className='flex gap-4 items-center'>
               {!user ? (
-                <Button 
+                <Button
                   onClick={() => router.push('/auth')}
-                  className="bg-gradient-to-r from-indigo-500 to-rose-500 hover:from-indigo-600 hover:to-rose-600 text-white"
+                  className='bg-gradient-to-r from-indigo-500 to-rose-500 hover:from-indigo-600 hover:to-rose-600 text-white'
                 >
                   Login
                 </Button>
@@ -61,18 +57,14 @@ export default function Header() {
                   onOpenChange={isOpen => setDrawerOpen(isOpen)}
                 >
                   <DropdownMenuTrigger asChild>
-                    <motion.div 
-                      className='w-10 rounded-full overflow-hidden cursor-pointer'
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ duration: 0.2 }}
-                    >
+                    <div className='w-10 rounded-full overflow-hidden cursor-pointer'>
                       <Avatar>
                         <AvatarImage src={user?.user_metadata?.profile_pic} />
-                        <AvatarFallback className="bg-gradient-to-r from-indigo-500 to-rose-500">
+                        <AvatarFallback className='bg-gradient-to-r from-indigo-500 to-rose-500'>
                           {user?.user_metadata?.name[0]}
                         </AvatarFallback>
                       </Avatar>
-                    </motion.div>
+                    </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className='mr-2 bg-[#030303] border border-white/[0.08]'>
                     <DropdownMenuLabel className='text-white'>
@@ -81,7 +73,10 @@ export default function Header() {
                     <DropdownMenuSeparator className='bg-white/[0.08]' />
                     <DropdownMenuItem className='focus:bg-white/[0.03] text-white/80'>
                       <div onClick={() => setDrawerOpen(false)}>
-                        <Link href='/dashboard' className='flex items-center gap-2'>
+                        <Link
+                          href='/dashboard'
+                          className='flex items-center gap-2'
+                        >
                           <LinkIcon className='h-4 w-4' />
                           My Links
                         </Link>
@@ -108,18 +103,14 @@ export default function Header() {
                   onOpenChange={isOpen => setDrawerOpen(isOpen)}
                 >
                   <Drawer.Trigger asChild>
-                    <motion.div 
-                      className='w-10 rounded-full overflow-hidden cursor-pointer'
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ duration: 0.2 }}
-                    >
+                    <div className='w-10 rounded-full overflow-hidden cursor-pointer'>
                       <Avatar>
                         <AvatarImage src={user?.user_metadata?.profile_pic} />
-                        <AvatarFallback className="bg-gradient-to-r from-indigo-500 to-rose-500">
+                        <AvatarFallback className='bg-gradient-to-r from-indigo-500 to-rose-500'>
                           {user?.user_metadata?.name[0]}
                         </AvatarFallback>
                       </Avatar>
-                    </motion.div>
+                    </div>
                   </Drawer.Trigger>
                   <Drawer.Portal>
                     <Drawer.Overlay className='fixed inset-0 bg-black/40 backdrop-blur-sm' />
@@ -167,7 +158,13 @@ export default function Header() {
           </div>
         </div>
       </nav>
-      {loading && <BarLoader className='fixed top-16 left-0 right-0 z-50' width={'100%'} color='#6366f1' />}
+      {loading && (
+        <BarLoader
+          className='fixed top-16 left-0 right-0 z-50'
+          width={'100%'}
+          color='#6366f1'
+        />
+      )}
     </motion.div>
   )
 }

@@ -35,9 +35,9 @@ export default function Home () {
     },
     {
       icon: <BarChart3 className='h-6 w-6 text-rose-400' />,
-      title: 'Detailed Analytics',
+      title: 'Custom URL Creation',
       description:
-        'Track clicks, engagement, and performance with comprehensive dashboards'
+        'Personalize your links with custom slugs for better branding'
     },
     {
       icon: <Globe2 className='h-6 w-6 text-cyan-400' />,
@@ -67,13 +67,13 @@ export default function Home () {
             onSubmit={handleShorten}
             className='flex flex-col items-center justify-center md:flex-row gap-4 px-4'
           >
-            <input
-              type='url'
+            <Input
+              type='text'
               required
               placeholder='Enter your long URL here...'
               value={longUrl}
+              className='text-neutral-300 bg-neutral-900 h-12 p-2'
               onChange={e => setLongUrl(e.target.value)}
-              className='h-12 p-4 rounded-md bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-indigo-500 focus:ring-indigo-500/20'
             />
             <Button
               type='submit'

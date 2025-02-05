@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { motion } from 'framer-motion'
 import { Copy, Download, Check, LinkIcon, Trash } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from './ui/button'
@@ -14,7 +15,7 @@ export default function LinkCard ({ url, fetchUrls }) {
 
   const downloadImage = async () => {
     const imageUrl = url?.qr_code
-    const fileName = url?.title 
+    const fileName = url?.title
     if (!imageUrl) {
       console.error('Image URL is missing.')
       return
@@ -22,25 +23,14 @@ export default function LinkCard ({ url, fetchUrls }) {
 
     try {
       setDownloading(true)
-      // Fetch the image as a blob
       const response = await fetch(imageUrl)
       const blob = await response.blob()
-
-      // Create a URL for the blob
       const blobUrl = URL.createObjectURL(blob)
-
-      // Create an anchor element
       const anchor = document.createElement('a')
       anchor.href = blobUrl
-      anchor.download = `${fileName}.png` // Set the file name and extension
-
-      // Append the anchor to the body
+      anchor.download = `${fileName}.png`
       document.body.appendChild(anchor)
-
-      // Trigger the download
       anchor.click()
-
-      // Clean up: Remove the anchor and revoke the blob URL
       document.body.removeChild(anchor)
       URL.revokeObjectURL(blobUrl)
       setTimeout(() => setDownloading(false), 2000)
@@ -48,6 +38,7 @@ export default function LinkCard ({ url, fetchUrls }) {
       console.error('Failed to download image:', error)
     }
   }
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(
       'https://clipr.vercel.app/' +
@@ -60,77 +51,88 @@ export default function LinkCard ({ url, fetchUrls }) {
   const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, url.id)
 
   return (
-    <div className='flex flex-col md:flex-row gap-5 border p-4 hover:bg-zinc-900 transition-all duration-300 rounded-lg'>
-      <img
-        src={url?.qr_code}
-        className='h-32 object-contain ring ring-blue-500 self-center md:self-start rounded-lg backdrop-filter backdrop-blur-md'
-        alt='qr code'
-      />
-      <Link href={`/link/${url?.id}`} className='flex flex-col flex-1 gap-2'>
-        <span className='text-2xl md:text-3xl font-extrabold hover:underline cursor-pointer'>
-          {url?.title}
-        </span>
-        <span className='object-contain text-lg md:text-2xl text-blue-400 md:font-bold hover:underline cursor-pointer'>
-          https://clipr.vercel.app/{url?.custom_url ? url?.custom_url : url.short_url}
-        </span>
-        <span className='flex break-all text-sm md:text-lg items-center gap-1 hover:underline cursor-pointer' style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-          <LinkIcon className='p-1' />
-          {url?.original_url}
-        </span>
-        <span className='flex items-end font-extralight text-xs md:text-sm flex-1'>
-          {new Date(url?.created_at).toLocaleString()}
-        </span>
-      </Link>
-      <div className='flex gap-2'>
-        <Button
-          variant='outline'
-          size='icon'
-          className='relative ml-2 rounded-md'
-          onClick={copyToClipboard}
-          aria-label={copied ? 'Copied' : 'Copy to clipboard'}
-        >
-          <span className='sr-only'>{copied ? 'Copied' : 'Copy'}</span>
-          <Copy
-            className={`h-4 w-4 transition-all duration-300 ${
-              copied ? 'scale-0' : 'scale-100'
-            }`}
+    <div className='bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.04] transition-all duration-300 rounded-lg overflow-hidden'>
+      <div className='flex flex-col md:flex-row gap-6 p-6'>
+        <div className='flex-shrink-0'>
+          <img
+            src={url?.qr_code}
+            className='h-32 w-32 object-contain rounded-lg border border-indigo-500/20 bg-white/[0.02] p-2'
+            alt='QR code'
           />
-          <Check
-            className={`absolute inset-0 m-auto h-4 w-4 transition-all duration-300 ${
-              copied ? 'scale-100' : 'scale-0'
-            }`}
-          />
-        </Button>
-        <Button
-          variant='outline'
-          size='icon'
-          className='relative ml-2 rounded-md'
-          onClick={downloadImage}
-          aria-label={downloading ? 'Downloaded' : 'Download Image'}
-        >
-          <span className='sr-only'>
-            {downloading ? 'Downloaded' : 'Download Image'}
-          </span>
-          <Download
-            className={`h-4 w-4 transition-all duration-300 ${
-              downloading ? 'scale-0' : 'scale-100'
-            }`}
-          />
-          <Check
-            className={`absolute inset-0 m-auto h-4 w-4 transition-all duration-300 ${
-              downloading ? 'scale-100' : 'scale-0'
-            }`}
-          />
-        </Button>
+        </div>
 
-        <Button
-          variant='outline'
-          size='icon'
-          onClick={() => fnDelete().then(() => fetchUrls())}
-          disable={loadingDelete}
-        >
-          {loadingDelete ? <BeatLoader size={5} color='white' /> : <Trash />}
-        </Button>
+        <Link href={`/link/${url?.id}`} className='flex flex-col flex-1 gap-3'>
+          <span className='text-2xl font-bold text-white hover:text-white/90 transition-colors'>
+            {url?.title}
+          </span>
+          <span className='text-lg text-indigo-400 hover:text-indigo-300 transition-colors break-all'>
+            https://clipr.vercel.app/
+            {url?.custom_url ? url?.custom_url : url.short_url}
+          </span>
+          <span className='flex items-center gap-2 text-white/60 hover:text-white/80 transition-colors text-sm break-all'>
+            <LinkIcon className='h-4 w-4 flex-shrink-0' />
+            {url?.original_url}
+          </span>
+          <span className='text-white/40 text-sm mt-auto'>
+            Created {new Date(url?.created_at).toLocaleString()}
+          </span>
+        </Link>
+
+        <div className='flex md:flex-col gap-2 self-start'>
+          <Button
+            variant='outline'
+            size='icon'
+            onClick={copyToClipboard}
+            className='relative bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] text-white'
+          >
+            <span className='sr-only'>{copied ? 'Copied' : 'Copy'}</span>
+            <Copy
+              className={`h-4 w-4 transition-all duration-300 ${
+                copied ? 'scale-0' : 'scale-100'
+              }`}
+            />
+            <Check
+              className={`absolute inset-0 m-auto h-4 w-4 transition-all duration-300 ${
+                copied ? 'scale-100' : 'scale-0'
+              }`}
+            />
+          </Button>
+
+          <Button
+            variant='outline'
+            size='icon'
+            onClick={downloadImage}
+            className='relative bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] text-white'
+          >
+            <span className='sr-only'>
+              {downloading ? 'Downloaded' : 'Download QR'}
+            </span>
+            <Download
+              className={`h-4 w-4 transition-all duration-300 ${
+                downloading ? 'scale-0' : 'scale-100'
+              }`}
+            />
+            <Check
+              className={`absolute inset-0 m-auto h-4 w-4 transition-all duration-300 ${
+                downloading ? 'scale-100' : 'scale-0'
+              }`}
+            />
+          </Button>
+
+          <Button
+            variant='outline'
+            size='icon'
+            onClick={() => fnDelete().then(() => fetchUrls())}
+            disabled={loadingDelete}
+            className='bg-white/[0.02] border-white/[0.08] hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 text-white/80'
+          >
+            {loadingDelete ? (
+              <BeatLoader size={5} color='white' />
+            ) : (
+              <Trash className='h-4 w-4' />
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   )

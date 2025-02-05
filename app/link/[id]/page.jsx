@@ -9,12 +9,11 @@ import LocationStats from '@/components/location-stats'
 import DeviceStats from '@/components/device-stats'
 import { getClicksForUrl } from '@/db/apiClicks'
 import { deleteUrl, getUrl } from '@/db/apiUrls'
-import { Copy, Download, LinkIcon, Trash, Check } from 'lucide-react'
-import { useEffect, useState, Suspense, lazy } from 'react'
+import { Copy, Download, LinkIcon, Trash, Check, MousePointerClick, Globe2, Dices as Devices } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { BarLoader, BeatLoader } from 'react-spinners'
 import { useRouter } from 'next/navigation'
-import React from 'react'
-import Link from 'next/link'
+import { motion } from 'framer-motion'
 
 const LinkPage = ({ params }) => {
   const { id } = params
@@ -38,7 +37,6 @@ const LinkPage = ({ params }) => {
   } = useFetch(getClicksForUrl, id)
 
   const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, id)
-  // console.log(stats)
 
   useEffect(() => {
     if (user && user.id) {
@@ -46,14 +44,12 @@ const LinkPage = ({ params }) => {
     }
   }, [user])
 
-  // Fetch stats after URL is loaded
   useEffect(() => {
     if (!error && loading === false) {
       fnStats()
     }
   }, [loading, error])
 
-  // Redirect to dashboard if there's an error
   useEffect(() => {
     if (error) {
       router.push('/dashboard')
@@ -75,15 +71,11 @@ const LinkPage = ({ params }) => {
       const response = await fetch(imageUrl)
       const blob = await response.blob()
       const blobUrl = URL.createObjectURL(blob)
-
       const anchor = document.createElement('a')
       anchor.href = blobUrl
       anchor.download = `${fileName}.png`
-
       document.body.appendChild(anchor)
-
       anchor.click()
-
       document.body.removeChild(anchor)
       URL.revokeObjectURL(blobUrl)
       setTimeout(() => setDownloading(false), 2000)
@@ -100,150 +92,157 @@ const LinkPage = ({ params }) => {
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
+
   return (
-    <>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {(loading || loadingStats) && (
-        <BarLoader className='mb-4' width={'100%'} color='#36d7b7' />
+        <BarLoader width={'100%'} color='#6366f1' />
       )}
-      <div className='flex flex-col gap-8 sm:flex-row justify-between px-6'>
-        <div className='flex flex-col items-start gap-8 rounded-lg sm:w-2/5'>
-          <span className='text-3xl md:text-4xl font-extrabold hover:underline cursor-pointer'>
-            {url?.title}
-          </span>
-          {link && (
+
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
+        {/* Link Details Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className='space-y-6'
+        >
+          <div className='bg-white/[0.02] border border-white/[0.08] rounded-lg p-6 space-y-6'>
+            <h1 className='text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-white/90 to-rose-300'>
+              {url?.title}
+            </h1>
+
+            {link && (
+              <a
+                href={`https://clipr.vercel.app/${link}`}
+                target='_blank'
+                rel='noreferrer'
+                className='block text-xl text-indigo-400 hover:text-indigo-300 transition-colors break-all'
+              >
+                https://clipr.vercel.app/{link}
+              </a>
+            )}
+
             <a
-              href={`https://clipr.vercel.app/${link}`}
+              href={url?.original_url}
               target='_blank'
               rel='noreferrer'
-              className='text-lg md:text-2xl text-blue-400 font-bold hover:underline'
+              className='flex items-center gap-2 text-white/60 hover:text-white/80 transition-colors break-all'
             >
-              https://clipr.vercel.app/{link}
-            </a>
-          )}
-          <a
-            href={url?.original_url}
-            target='_blank'
-            className='flex text-sm md:text-lg items-center gap-1 hover:underline cursor-pointer'
-          >
-            <LinkIcon className='p-1' />
-            <span
-              className='break-all'
-              style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
-            >
+              <LinkIcon className='h-4 w-4 flex-shrink-0' />
               {url?.original_url}
-            </span>
-          </a>
-          <span className='flex items-end font-extralight text-xs md:text-sm'>
-            {url?.created_at ? new Date(url.created_at).toLocaleString() : null}
-          </span>
-          <div className='flex gap-2'>
-            <Button
-              variant='outline'
-              size='icon'
-              className='relative ml-2 rounded-md'
-              onClick={copyToClipboard}
-              aria-label={copied ? 'Copied' : 'Copy to clipboard'}
-            >
-              <span className='sr-only'>{copied ? 'Copied' : 'Copy'}</span>
-              <Copy
-                className={`h-4 w-4 transition-all duration-300 ${
-                  copied ? 'scale-0' : 'scale-100'
-                }`}
-              />
-              <Check
-                className={`absolute inset-0 m-auto h-4 w-4 transition-all duration-300 ${
-                  copied ? 'scale-100' : 'scale-0'
-                }`}
-              />
-            </Button>
-            <Button
-              variant='outline'
-              size='icon'
-              className='relative ml-2 rounded-md'
-              onClick={downloadImage}
-              aria-label={downloading ? 'Downloaded' : 'Download Image'}
-            >
-              <span className='sr-only'>
-                {downloading ? 'Downloaded' : 'Download Image'}
-              </span>
-              <Download
-                className={`h-4 w-4 transition-all duration-300 ${
-                  downloading ? 'scale-0' : 'scale-100'
-                }`}
-              />
-              <Check
-                className={`absolute inset-0 m-auto h-4 w-4 transition-all duration-300 ${
-                  downloading ? 'scale-100' : 'scale-0'
-                }`}
-              />
-            </Button>
+            </a>
 
-            <Button
-              variant='outline'
-              size='icon'
-              onClick={() =>
-                fnDelete().then(() => {
-                  router.push('/dashboard')
-                })
-              }
-              disabled={loadingDelete}
-            >
-              {loadingDelete ? (
-                <BeatLoader size={5} color='white' />
-              ) : (
-                <Trash />
+            <div className='text-white/40 text-sm'>
+              Created {url?.created_at ? new Date(url.created_at).toLocaleString() : null}
+            </div>
+
+            <div className='flex gap-2'>
+              <Button
+                variant='outline'
+                size='icon'
+                onClick={copyToClipboard}
+                className='relative bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] text-white'
+              >
+                <span className='sr-only'>{copied ? 'Copied' : 'Copy'}</span>
+                <Copy className={`h-4 w-4 transition-all duration-300 ${copied ? 'scale-0' : 'scale-100'}`} />
+                <Check className={`absolute inset-0 m-auto h-4 w-4 transition-all duration-300 ${copied ? 'scale-100' : 'scale-0'}`} />
+              </Button>
+
+              <Button
+                variant='outline'
+                size='icon'
+                onClick={downloadImage}
+                className='relative bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] text-white'
+              >
+                <span className='sr-only'>{downloading ? 'Downloaded' : 'Download QR'}</span>
+                <Download className={`h-4 w-4 transition-all duration-300 ${downloading ? 'scale-0' : 'scale-100'}`} />
+                <Check className={`absolute inset-0 m-auto h-4 w-4 transition-all duration-300 ${downloading ? 'scale-100' : 'scale-0'}`} />
+              </Button>
+
+              <Button
+                variant='outline'
+                size='icon'
+                onClick={() => fnDelete().then(() => router.push('/dashboard'))}
+                disabled={loadingDelete}
+                className='bg-white/[0.02] border-white/[0.08] hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 text-white/80'
+              >
+                {loadingDelete ? <BeatLoader size={5} color='white' /> : <Trash className="h-4 w-4" />}
+              </Button>
+            </div>
+
+            <div className='relative'>
+              {!imageLoaded && (
+                <Skeleton className='h-64 w-64 rounded-lg bg-white/[0.02]' />
               )}
-            </Button>
+              <img
+                src={url?.qr_code}
+                className={`h-64 w-64 rounded-lg border border-indigo-500/20 bg-white/[0.02] p-2 transition-opacity duration-300 ${
+                  imageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                alt='QR code'
+                onLoad={() => setImageLoaded(true)}
+              />
+            </div>
           </div>
-          <div className='relative'>
-            {!imageLoaded && (
-              <div>
-                <Skeleton className='h-[250px] w-[250px] rounded-xl' />
-              </div>
+        </motion.div>
+
+        {/* Stats Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Card className='bg-white/[0.02] border-white/[0.08]'>
+            <CardHeader>
+              <CardTitle className='text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-white/90 to-rose-300'>
+                Analytics Overview
+              </CardTitle>
+            </CardHeader>
+            
+            {stats && stats.length ? (
+              <CardContent className='space-y-8'>
+                <Card className='bg-white/[0.02] border-white/[0.08]'>
+                  <CardHeader>
+                    <CardTitle className='flex items-center gap-2 text-white/90'>
+                      <MousePointerClick className='h-5 w-5 text-rose-400' />
+                      Total Clicks
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className='text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-rose-300 to-white/90'>
+                      {stats?.length}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <div className='space-y-6'>
+                  <div className='space-y-4'>
+                    <h3 className='flex items-center gap-2 text-lg font-semibold text-white/90'>
+                      <Globe2 className='h-5 w-5 text-cyan-400' />
+                      Geographic Distribution
+                    </h3>
+                    <LocationStats stats={stats} />
+                  </div>
+
+                  <div className='space-y-4'>
+                    <h3 className='flex items-center gap-2 text-lg font-semibold text-white/90'>
+                      <Devices className='h-5 w-5 text-amber-400' />
+                      Device Breakdown
+                    </h3>
+                    <DeviceStats stats={stats} />
+                  </div>
+                </div>
+              </CardContent>
+            ) : (
+              <CardContent className='text-white/60 text-center py-12'>
+                {loadingStats ? 'Loading analytics...' : 'No clicks recorded yet'}
+              </CardContent>
             )}
-            <img
-              src={url?.qr_code}
-              className={`w-full self-center sm:self-start rounded-lg ring ring-blue-500 p-1 object-contain transition-opacity duration-300 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
-              alt='qr code'
-              onLoad={() => setImageLoaded(true)}
-            />
-          </div>
-        </div>
-
-        <Card className='sm:w-3/5'>
-          <CardHeader>
-            <CardTitle className='text-3xl md:text-4xl font-extrabold'>
-              Stats
-            </CardTitle>
-          </CardHeader>
-          {stats && stats.length ? (
-            <CardContent className='flex flex-col gap-6'>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Total Clicks</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>{stats?.length}</p>
-                </CardContent>
-              </Card>
-
-              <CardTitle>Locations Data</CardTitle>
-              <LocationStats stats={stats} />
-              <CardTitle>Device Info</CardTitle>
-              <DeviceStats stats={stats} />
-            </CardContent>
-          ) : (
-            <CardContent>
-              {loadingStats === false
-                ? 'No Statistics yet'
-                : 'Loading Statistics..'}
-            </CardContent>
-          )}
-        </Card>
+          </Card>
+        </motion.div>
       </div>
-    </>
+    </div>
   )
 }
 
