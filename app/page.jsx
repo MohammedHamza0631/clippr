@@ -70,7 +70,7 @@ export default function Home () {
             <Input
               type='text'
               required
-              placeholder='Enter your long URL here...'
+              placeholder='Enter your URL here...'
               value={longUrl}
               className='text-neutral-300 bg-neutral-900 h-12 p-2'
               onChange={e => setLongUrl(e.target.value)}
@@ -134,7 +134,7 @@ export default function Home () {
             onClick={() => router.push('/auth')}
             className='h-12 px-8 bg-gradient-to-r from-indigo-500 to-rose-500 hover:from-indigo-600 hover:to-rose-600 text-white'
           >
-            Get Started Free
+            Get Started for Free
             <ArrowRight className='ml-2 h-4 w-4' />
           </Button>
         </div>

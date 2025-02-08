@@ -1,5 +1,5 @@
 import supabase, { supabaseUrl } from "./supabase";
-
+import { invalidateUrlCache, cacheUrl } from "@/utils/redis";
 export async function getUrls(user_id) {
   let { data, error } = await supabase
     .from("urls")
@@ -79,11 +79,18 @@ export async function createUrl(
     throw new Error("Error creating short URL");
   }
 
+  // Cache the URL for future requests
+  await cacheUrl(short_url, JSON.stringify(data));
+
   return data;
 }
 
 export async function deleteUrl(id) {
   const { data, error } = await supabase.from("urls").delete().eq("id", id);
+
+  if(!error && data) {
+    await invalidateUrlCache(id);
+  }
 
   if (error) {
     console.error(error);
