@@ -113,7 +113,6 @@ export default function CreateLink ({ fetchUrls }) {
         }}
       >
         <DialogTrigger asChild>
-       
           <ShimmerButton className='shadow-2xl'>
             <span className='whitespace-pre-wrap text-center text-xs leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg'>
               Create Link
@@ -186,7 +185,11 @@ export default function CreateLink ({ fetchUrls }) {
       }}
     >
       <Drawer.Trigger asChild>
-        <Button variant='outline'>Create Link</Button>
+        <ShimmerButton className='shadow-2xl'>
+          <span className='whitespace-pre-wrap text-center text-xs leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg'>
+            Create Link
+          </span>
+        </ShimmerButton>
       </Drawer.Trigger>
       <Drawer.Portal>
         <Drawer.Overlay className='fixed inset-0 bg-black/40' />
