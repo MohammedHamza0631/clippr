@@ -27,7 +27,6 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useRouter, useSearchParams } from 'next/navigation'
-import VaulDrawer from '@/components/ui/vaul-drawer'
 import { Drawer } from 'vaul'
 import { ShimmerButton } from './ui/shimmer-button'
 
