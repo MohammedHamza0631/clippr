@@ -66,8 +66,15 @@ export default function LinkCard ({ url, fetchUrls }) {
             {url?.title}
           </span>
           <span className='text-lg text-indigo-400 hover:text-indigo-300 transition-colors break-all'>
-            https://clipr.vercel.app/
-            {url?.custom_url ? url?.custom_url : url.short_url}
+            <Link
+              href={`https://clipr.vercel.app/${
+                url?.custom_url ? url?.custom_url : url.short_url
+              }`}
+              passHref
+            >
+              https://clipr.vercel.app/
+              {url?.custom_url ? url?.custom_url : url.short_url}
+            </Link>
           </span>
           <span className='flex items-center gap-2 text-white/60 hover:text-white/80 transition-colors text-sm break-all'>
             <LinkIcon className='h-4 w-4 flex-shrink-0' />

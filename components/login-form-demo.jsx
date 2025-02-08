@@ -113,7 +113,7 @@ export default function LoginFormDemo () {
           className='bg-gradient-to-br relative group/btn from-zinc-900 to-zinc-900 block bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]'
           type='submit'
         >
-          {loading ? <BeatLoader size={10} color='#36d7b7' /> : 'Log in'} &rarr;
+          {loading ? <BeatLoader size={10} color='#36d7b7' /> : 'Log in'}
           <BottomGradient />
         </button>
 

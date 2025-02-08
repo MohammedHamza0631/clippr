@@ -176,6 +176,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { BarLoader } from 'react-spinners'
 import { LayoutDashboard, LogOut, Menu, Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -307,16 +308,24 @@ export default function Header () {
               {user ? (
                 <>
                   {isDesktop ? (
-                    <button
-                      onClick={handleLogout}
-                      className={cn(
-                        'relative flex items-center gap-2 px-4 py-1.5 rounded-full transition-colors',
-                        'text-white/60 hover:text-white'
-                      )}
-                    >
-                      <LogOut className='h-5 w-5' />
-                      <span className='text-sm'>Logout</span>
-                    </button>
+                    <>
+                      <button
+                        onClick={handleLogout}
+                        className={cn(
+                          'relative flex items-center gap-2 px-4 py-1.5 rounded-full transition-colors',
+                          'text-white/60 hover:text-white'
+                        )}
+                      >
+                        <LogOut className='h-5 w-5' />
+                        <span className='text-sm'>Logout</span>
+                      </button>
+                      <Avatar className='mr-[-0.25rem] h-10 w-10'>
+                        <AvatarImage src={user?.user_metadata?.profile_pic} />
+                        <AvatarFallback className='bg-gradient-to-r from-indigo-500 to-rose-500'>
+                          {user?.user_metadata?.name[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                    </>
                   ) : (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -325,7 +334,15 @@ export default function Header () {
                           size='icon'
                           className='hover:bg-white/[0.08]'
                         >
-                          <Menu className='h-5 w-5 text-white/60 hover:text-white' />
+                          {/* <Menu className='h-5 w-5 text-white/60 hover:text-white' /> */}
+                          <Avatar className='mr-[-0.25rem] h-10 w-10'>
+                            <AvatarImage
+                              src={user?.user_metadata?.profile_pic}
+                            />
+                            <AvatarFallback className='bg-gradient-to-r from-indigo-500 to-rose-500'>
+                              {user?.user_metadata?.name[0]}
+                            </AvatarFallback>
+                          </Avatar>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
