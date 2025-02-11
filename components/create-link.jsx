@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils'
 import useMediaQuery from '@/hooks/use-media-query'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { DrawerFooter } from '@/components/ui/drawer'
+import GradientButton  from '@/components/ui/GradientButton'
 import {
   Dialog,
   DialogContent,
@@ -23,7 +23,6 @@ import {
   DialogFooter
 } from '@/components/ui/dialog'
 
-import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -122,15 +121,33 @@ export default function CreateLink ({ fetchUrls }) {
           <DialogHeader>
             <DialogTitle>Create a new Link</DialogTitle>
           </DialogHeader>
-          {formValues?.longUrl && (
-            <QRCode
-              qrStyle='dots'
-              eyeRadius={10}
-              ref={ref}
-              size={250}
-              value={formValues?.longUrl}
-            />
-          )}
+          <div className="relative w-full aspect-square max-w-[250px] h-[250px] mx-auto">
+            {!formValues?.longUrl ? (
+              <div className="w-full h-full rounded-lg relative overflow-hidden bg-zinc-950/50">
+                <p className='text-center text-neutral-300 text-sm'>QR Code</p>
+                <span className='absolute inset-x-0 top-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
+                <span className='absolute inset-x-0 bottom-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
+                <span className='absolute inset-y-0 left-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
+                <span className='absolute inset-y-0 right-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
+                <div className="absolute inset-0 bg-zinc-900/50"></div>
+              </div>
+            ) : (
+              <div className="w-full h-full rounded-lg relative overflow-hidden bg-zinc-950/50 p-4">
+                <span className='absolute inset-x-0 top-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
+                <span className='absolute inset-x-0 bottom-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
+                <span className='absolute inset-y-0 left-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
+                <span className='absolute inset-y-0 right-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
+                <QRCode
+                  qrStyle='dots'
+                  eyeRadius={10}
+                  ref={ref}
+                  size={200}
+                  value={formValues?.longUrl}
+                  className="w-full h-full"
+                />
+              </div>
+            )}
+          </div>
           <Input
             id='title'
             placeholder="Short Link's Title"
@@ -159,14 +176,14 @@ export default function CreateLink ({ fetchUrls }) {
           </div>
           {error && <Error message={errors.message} />}
           <DialogFooter className='sm:justify-start'>
-            <Button
+            <GradientButton
               type='button'
-              variant='destructive'
               onClick={createNewLink}
               disabled={loading}
+              className='w-fit h-12 flex items-center justify-center px-12 rounded-lg'
             >
-              {loading ? <BeatLoader size={10} color='white' /> : 'Create'}
-            </Button>
+              {loading ? <BeatLoader size={10} color='rose-400' /> : 'Create'}
+            </GradientButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -202,17 +219,33 @@ export default function CreateLink ({ fetchUrls }) {
               Fill in the information below to create your new link.
             </Drawer.Description>
 
-            {formValues?.longUrl && (
-              <div className='flex justify-center my-4'>
-                <QRCode
-                  qrStyle='dots'
-                  eyeRadius={10}
-                  ref={ref}
-                  size={150}
-                  value={formValues?.longUrl}
-                />
-              </div>
-            )}
+            <div className="relative w-full aspect-square max-w-[250px] mx-auto">
+              {!formValues?.longUrl ? (
+                <div className="mt-4 w-full h-full rounded-lg relative overflow-hidden bg-zinc-950/50">
+                  <p className='text-center text-neutral-300 text-sm'>QR Code</p>
+                  <span className='absolute inset-x-0 top-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
+                  <span className='absolute inset-x-0 bottom-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
+                  <span className='absolute inset-y-0 left-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
+                  <span className='absolute inset-y-0 right-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
+                  <div className="absolute inset-0 bg-zinc-900/50"></div>
+                </div>
+              ) : (
+                <div className="mt-4 w-full h-full rounded-lg relative overflow-hidden bg-zinc-950/50 p-4">
+                  <span className='absolute inset-x-0 top-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
+                  <span className='absolute inset-x-0 bottom-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
+                  <span className='absolute inset-y-0 left-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
+                  <span className='absolute inset-y-0 right-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
+                  <QRCode
+                    qrStyle='dots'
+                    eyeRadius={10}
+                    ref={ref}
+                    size={200}
+                    value={formValues?.longUrl}
+                    className=" w-full h-full"
+                  />
+                </div>
+              )}
+            </div>
 
             <Label
               htmlFor='title'
@@ -265,17 +298,13 @@ export default function CreateLink ({ fetchUrls }) {
             </div>
             {error && <Error message={error.message} />}
 
-            <Button
-              type='button'
-              variant='destructive'
+            <GradientButton
               onClick={createNewLink}
               disabled={loading}
-              className={cn('mt-4 w-full', {
-                'cursor-not-allowed': loading
-              })}
+              className='mt-4 w-fit h-12 flex items-center justify-center px-12 rounded-lg'
             >
-              {loading ? <BeatLoader size={10} color='white' /> : 'Create'}
-            </Button>
+              {loading ? <BeatLoader size={10} color='rose-400' /> : 'Create'}
+            </GradientButton>
 
             {/* <Button variant='outline' onClick={handleDrawerClose}>
               Cancel

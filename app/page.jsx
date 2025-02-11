@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import GradientButton from '@/components/ui/GradientButton'
 import {
   BarChart3,
   Globe2,
@@ -75,13 +76,10 @@ export default function Home () {
               className='text-neutral-300 bg-neutral-900 h-12 p-2'
               onChange={e => setLongUrl(e.target.value)}
             />
-            <Button
-              type='submit'
-              className='h-12 px-8 bg-gradient-to-r from-indigo-500 to-rose-500 hover:from-indigo-600 hover:to-rose-600 text-white'
-            >
+            <GradientButton type='submit'>
               Shorten URL
-              <ArrowRight className='ml-2 h-4 w-4' />
-            </Button>
+              <ArrowRight className='ml-2 mt-px h-4 w-4' />
+            </GradientButton>
           </form>
         </div>
       </section>
