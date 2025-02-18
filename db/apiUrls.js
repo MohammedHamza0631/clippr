@@ -1,5 +1,10 @@
 import supabase, { supabaseUrl } from "./supabase";
 import { rateLimit, getIdentifier } from "./rate-limiter";
+import { redis } from "./redis-client";
+
+// Cache TTL in seconds
+const CACHE_TTL = 3600; // 1 hour
+const URL_LIST_TTL = 300; // 5 minutes
 
 // Rate limit configuration
 const URL_CREATE_LIMIT = 10; // 10 URL creations
@@ -8,6 +13,26 @@ const URL_READ_LIMIT = 20; // 30 URL reads
 const URL_READ_DURATION = 10; // per 10 seconds
 const URL_DELETE_LIMIT = 10; // 10 URL deletions
 const URL_DELETE_DURATION = 60; // per minute
+
+// Cache key generators
+const getUrlCacheKey = (id) => `url:${id}`;
+const getUserUrlsCacheKey = (userId) => `user_urls:${userId}`;
+const getShortUrlCacheKey = (shortId) => `short_url:${shortId}`;
+
+// Cache helpers
+async function cacheUrl(url) {
+  if (!url) return;
+  const cacheKey = getUrlCacheKey(url.id);
+  await redis.set(cacheKey, JSON.stringify(url), { ex: CACHE_TTL });
+}
+
+async function invalidateUrlCache(id) {
+  await redis.del(getUrlCacheKey(id));
+}
+
+async function invalidateUserUrlsCache(userId) {
+  await redis.del(getUserUrlsCacheKey(userId));
+}
 
 export async function getUrls(user_id, req) {
   // Check rate limit for URL listing
@@ -26,6 +51,15 @@ export async function getUrls(user_id, req) {
     );
   }
 
+  // Try to get from cache first
+  const cacheKey = getUserUrlsCacheKey(user_id);
+  const cachedUrls = await redis.get(cacheKey);
+  
+  if (cachedUrls) {
+    return JSON.parse(cachedUrls);
+  }
+
+  // If not in cache, get from database
   let { data, error } = await supabase
     .from("urls")
     .select("*")
@@ -34,6 +68,13 @@ export async function getUrls(user_id, req) {
   if (error) {
     console.error(error);
     throw new Error("Unable to load URLs");
+  }
+
+  // Cache the results
+  if (data) {
+    await redis.set(cacheKey, JSON.stringify(data), { ex: URL_LIST_TTL });
+    // Cache individual URLs
+    await Promise.all(data.map(url => cacheUrl(url)));
   }
 
   return data;
@@ -56,6 +97,19 @@ export async function getUrl({ id, user_id }, req) {
     );
   }
 
+  // Try to get from cache first
+  const cacheKey = getUrlCacheKey(id);
+  const cachedUrl = await redis.get(cacheKey);
+  
+  if (cachedUrl) {
+    const url = JSON.parse(cachedUrl);
+    // Verify user ownership even for cached URLs
+    if (url.user_id === user_id) {
+      return url;
+    }
+  }
+
+  // If not in cache or unauthorized, get from database
   const { data, error } = await supabase
     .from("urls")
     .select("*")
@@ -66,6 +120,11 @@ export async function getUrl({ id, user_id }, req) {
   if (error) {
     console.error(error);
     throw new Error("Short Url not found");
+  }
+
+  // Cache the result
+  if (data) {
+    await cacheUrl(data);
   }
 
   return data;
@@ -88,6 +147,15 @@ export async function getLongUrl(id, req) {
     );
   }
 
+  // Try to get from cache first
+  const shortUrlKey = getShortUrlCacheKey(id);
+  const cachedShortUrl = await redis.get(shortUrlKey);
+
+  if (cachedShortUrl) {
+    return JSON.parse(cachedShortUrl);
+  }
+
+  // If not in cache, get from database
   let { data: shortLinkData, error: shortLinkError } = await supabase
     .from("urls")
     .select("id, original_url")
@@ -97,6 +165,11 @@ export async function getLongUrl(id, req) {
   if (shortLinkError && shortLinkError.code !== "PGRST116") {
     console.error("Error fetching short link:", shortLinkError);
     return;
+  }
+
+  // Cache the result
+  if (shortLinkData) {
+    await redis.set(shortUrlKey, JSON.stringify(shortLinkData), { ex: CACHE_TTL });
   }
 
   return shortLinkData;
@@ -149,6 +222,13 @@ export async function createUrl({ title, longUrl, customUrl, user_id }, qrcode, 
     throw new Error("Error creating short URL");
   }
 
+  if (data) {
+    // Cache the new URL
+    await cacheUrl(data[0]);
+    // Invalidate user's URL list cache to force a refresh
+    await invalidateUserUrlsCache(user_id);
+  }
+
   return data;
 }
 
@@ -169,11 +249,28 @@ export async function deleteUrl(id, req) {
     );
   }
 
+  // Get the URL first to know the user_id for cache invalidation
+  const { data: urlData } = await supabase
+    .from("urls")
+    .select("user_id, short_url, custom_url")
+    .eq("id", id)
+    .single();
+
   const { data, error } = await supabase.from("urls").delete().eq("id", id);
 
   if (error) {
     console.error(error);
     throw new Error("Unable to delete Url");
+  }
+
+  if (urlData) {
+    // Invalidate all related caches
+    await Promise.all([
+      invalidateUrlCache(id),
+      invalidateUserUrlsCache(urlData.user_id),
+      redis.del(getShortUrlCacheKey(urlData.short_url)),
+      urlData.custom_url && redis.del(getShortUrlCacheKey(urlData.custom_url))
+    ]);
   }
 
   return data;
