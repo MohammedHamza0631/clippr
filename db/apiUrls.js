@@ -4,7 +4,7 @@ import { rateLimit, getIdentifier } from "./rate-limiter";
 // Rate limit configuration
 const URL_CREATE_LIMIT = 10; // 10 URL creations
 const URL_CREATE_DURATION = 60; // per minute
-const URL_READ_LIMIT = 30; // 30 URL reads
+const URL_READ_LIMIT = 20; // 30 URL reads
 const URL_READ_DURATION = 10; // per 10 seconds
 const URL_DELETE_LIMIT = 10; // 10 URL deletions
 const URL_DELETE_DURATION = 60; // per minute
