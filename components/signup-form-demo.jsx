@@ -30,10 +30,10 @@ export default function SignupFormDemo () {
     profile_pic: null
   })
 
-  const handleSubmit = e => {
-    e.preventDefault()
-    console.log('Form submitted')
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await handleSignup();
+  };
 
   const handleInputChange = e => {
     const { name, value, files } = e.target
@@ -82,12 +82,12 @@ export default function SignupFormDemo () {
 
   return (
     <div className=' w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-black'>
-      <h2 className='font-bold text-xl text-neutral-200'>Welcome to Clippr</h2>
+      <h2 className='font-bold text-xl text-neutral-200'>Create an account</h2>
       <p className='text-sm max-w-sm mt-2 text-neutral-300'>
-        Create a new account if you haven&rsquo;t already
+        Create an account to get started
       </p>
       {error && <Error message={error?.message} />}
-      <div className='my-8'>
+      <form onSubmit={handleSubmit} className='my-8'>
         <div className='flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4'>
           <LabelInputContainer>
             <Label className='text-neutral-200' htmlFor='firstname'>
@@ -109,10 +109,11 @@ export default function SignupFormDemo () {
             Email
           </Label>
           <Input
+            id='email'
             name='email'
             type='email'
             placeholder='Enter Email'
-            className='text-neutral-300 rounded-lg border border-neutral-800 w-full  bg-neutral-950 placeholder:text-neutral-700'
+            className='text-neutral-300 rounded-lg border border-neutral-800 w-full bg-neutral-950 placeholder:text-neutral-700'
             onChange={handleInputChange}
           />
           {errors.email && <Error message={errors.email} />}
@@ -122,10 +123,11 @@ export default function SignupFormDemo () {
             Password
           </Label>
           <Input
+            id='password'
             name='password'
             type='password'
             placeholder='••••••••'
-            className='text-neutral-300 rounded-lg border border-neutral-800 w-full  bg-neutral-950 placeholder:text-neutral-700'
+            className='text-neutral-300 rounded-lg border border-neutral-800 w-full bg-neutral-950 placeholder:text-neutral-700'
             onChange={handleInputChange}
           />
           {errors.password && <Error message={errors.password} />}
@@ -145,15 +147,14 @@ export default function SignupFormDemo () {
         </LabelInputContainer>
         {errors.profile_pic && <Error message={errors.profile_pic} />}
         <button
-          onClick={handleSignup}
-          className='bg-gradient-to-br relative group/btn from-zinc-900 to-zinc-900 block bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]'
           type='submit'
+          className='bg-gradient-to-br relative group/btn from-zinc-900 to-zinc-900 block bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]'
+          disabled={loading}
         >
-          {loading ? <BeatLoader size={10} color='#36d7b7' /> : 'Sign Up'}{' '}
-          &rarr;
+          {loading ? <BeatLoader size={10} color='#36d7b7' /> : 'Sign up'}
           <BottomGradient />
         </button>
-      </div>
+      </form>
     </div>
   )
 }
@@ -161,8 +162,8 @@ export default function SignupFormDemo () {
 const BottomGradient = () => {
   return (
     <>
-      <span className='group-hover/btn:opacity-100 block transition duration-500 opacity-0 absolute h-px w-full -bottom-px inset-x-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent' />
-      <span className='group-hover/btn:opacity-100 blur-sm block transition duration-500 opacity-0 absolute h-px w-1/2 mx-auto -bottom-px inset-x-10 bg-gradient-to-r from-transparent via-indigo-500 to-transparent' />
+      <span className='group-hover/btn:opacity-100 block transition duration-500 opacity-0 absolute h-px w-full -bottom-px inset-x-0 bg-gradient-to-r from-transparent via-rose-500 to-transparent' />
+      <span className='group-hover/btn:opacity-100 blur-sm block transition duration-500 opacity-0 absolute h-px w-1/2 mx-auto -bottom-px inset-x-10 bg-gradient-to-r from-transparent via-rose-500 to-transparent' />
     </>
   )
 }

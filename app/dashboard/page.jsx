@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { BarLoader } from 'react-spinners'
 import {
-  Filter,
+  Filter, Search,
   Link as LinkIcon,
   BarChart3,
   MousePointerClick
@@ -94,12 +94,12 @@ export default function Dashboard () {
       <motion.div className='relative mb-8'>
         <Input
           type='text'
-          placeholder='Filter Links...'
+          placeholder='Search Links...'
           value={searchQuery}
           className='text-neutral-300 bg-neutral-900'
           onChange={e => setSearchQuery(e.target.value)}
         />
-        <Filter className='absolute top-2.5 right-3 h-5 w-5 text-white/40' />
+        <Search className='absolute top-2.5 right-3 h-5 w-5 text-white/40' />
       </motion.div>
 
       {error && <Error message={error?.message} />}
