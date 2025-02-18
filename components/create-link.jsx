@@ -29,6 +29,99 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Drawer } from 'vaul'
 import { ShimmerButton } from './ui/shimmer-button'
 
+// First, let's create a reusable QR container component
+const QRContainer = ({ children, showQR, qrRef }) => {
+  const [copied, setCopied] = useState(false);
+  
+  const copyQRCode = async () => {
+    try {
+      const canvas = qrRef.current.canvasRef.current;
+      canvas.toBlob(async (blob) => {
+        const item = new ClipboardItem({ "image/png": blob });
+        await navigator.clipboard.write([item]);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+    } catch (err) {
+      console.error('Failed to copy QR code:', err);
+    }
+  };
+
+  return (
+    <div className="relative w-full h-full rounded-xl bg-white dark:bg-zinc-900 p-4">
+      {/* Content container */}
+      <div className="relative h-full w-full flex flex-col items-center justify-center gap-2">
+        {!showQR ? (
+          <>
+            <div className="w-16 h-16 rounded-lg border-2 border-dashed border-zinc-300 dark:border-zinc-700 flex items-center justify-center">
+              <svg
+                className="w-8 h-8 text-zinc-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+            </div>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 text-center">
+              Enter a long link to<br />generate a QR code
+            </p>
+          </>
+        ) : (
+          <div className="relative w-full h-full flex items-center justify-center">
+            <div className="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-lg">
+              {children}
+            </div>
+            {/* Copy button */}
+            <button
+              className="absolute top-2 right-2 p-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors"
+              onClick={copyQRCode}
+              title="Copy QR Code"
+            >
+              <span className="sr-only">{copied ? 'Copied' : 'Copy'}</span>
+              <svg
+                className={`w-4 h-4 text-zinc-600 dark:text-zinc-400 transition-all duration-300 ${
+                  copied ? 'scale-0' : 'scale-100'
+                }`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
+              </svg>
+              <svg
+                className={`absolute inset-0 m-auto w-4 h-4 text-zinc-600 dark:text-zinc-400 transition-all duration-300 ${
+                  copied ? 'scale-100' : 'scale-0'
+                }`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export default function CreateLink ({ fetchUrls }) {
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const [open, setOpen] = useState(false)
@@ -100,6 +193,16 @@ export default function CreateLink ({ fetchUrls }) {
     setOpen(false)
   }
 
+  // Update QR code props for better dark mode
+  const qrCodeProps = {
+    qrStyle: 'dots',
+    eyeRadius: 8,
+    size: 180,
+    bgColor: '#ffffff',
+    fgColor: '#000000',
+    className: "w-full h-full max-w-[180px]"
+  }
+
   if (isDesktop) {
     return (
       <Dialog
@@ -121,32 +224,16 @@ export default function CreateLink ({ fetchUrls }) {
           <DialogHeader>
             <DialogTitle>Create a new Link</DialogTitle>
           </DialogHeader>
-          <div className="relative w-full aspect-square max-w-[250px] h-[250px] mx-auto">
-            {!formValues?.longUrl ? (
-              <div className="w-full h-full rounded-lg relative overflow-hidden bg-zinc-950/50">
-                <p className='text-center text-neutral-300 text-sm'>QR Code</p>
-                <span className='absolute inset-x-0 top-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
-                <span className='absolute inset-x-0 bottom-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
-                <span className='absolute inset-y-0 left-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
-                <span className='absolute inset-y-0 right-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
-                <div className="absolute inset-0 bg-zinc-900/50"></div>
-              </div>
-            ) : (
-              <div className="w-full h-full rounded-lg relative overflow-hidden bg-zinc-950/50 p-4">
-                <span className='absolute inset-x-0 top-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
-                <span className='absolute inset-x-0 bottom-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
-                <span className='absolute inset-y-0 left-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
-                <span className='absolute inset-y-0 right-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
+          <div className="relative w-full aspect-square max-w-[300px] mx-auto">
+            <QRContainer showQR={!!formValues?.longUrl} qrRef={ref}>
+              {formValues?.longUrl && (
                 <QRCode
-                  qrStyle='dots'
-                  eyeRadius={10}
+                  {...qrCodeProps}
                   ref={ref}
-                  size={200}
-                  value={formValues?.longUrl}
-                  className="w-full h-full"
+                  value={formValues.longUrl}
                 />
-              </div>
-            )}
+              )}
+            </QRContainer>
           </div>
           <Input
             id='title'
@@ -219,32 +306,16 @@ export default function CreateLink ({ fetchUrls }) {
               Fill in the information below to create your new link.
             </Drawer.Description>
 
-            <div className="relative w-full aspect-square max-w-[250px] mx-auto">
-              {!formValues?.longUrl ? (
-                <div className="mt-4 w-full h-full rounded-lg relative overflow-hidden bg-zinc-950/50">
-                  <p className='text-center text-neutral-300 text-sm'>QR Code</p>
-                  <span className='absolute inset-x-0 top-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
-                  <span className='absolute inset-x-0 bottom-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
-                  <span className='absolute inset-y-0 left-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
-                  <span className='absolute inset-y-0 right-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
-                  <div className="absolute inset-0 bg-zinc-900/50"></div>
-                </div>
-              ) : (
-                <div className="mt-4 w-full h-full rounded-lg relative overflow-hidden bg-zinc-950/50 p-4">
-                  <span className='absolute inset-x-0 top-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
-                  <span className='absolute inset-x-0 bottom-px h-px mx-auto bg-gradient-to-r from-transparent via-rose-400 to-transparent'></span>
-                  <span className='absolute inset-y-0 left-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
-                  <span className='absolute inset-y-0 right-px w-px my-auto bg-gradient-to-b from-transparent via-rose-400 to-transparent'></span>
+            <div className="relative w-full aspect-square max-w-[300px] mx-auto mt-4">
+              <QRContainer showQR={!!formValues?.longUrl} qrRef={ref}>
+                {formValues?.longUrl && (
                   <QRCode
-                    qrStyle='dots'
-                    eyeRadius={10}
+                    {...qrCodeProps}
                     ref={ref}
-                    size={200}
-                    value={formValues?.longUrl}
-                    className=" w-full h-full"
+                    value={formValues.longUrl}
                   />
-                </div>
-              )}
+                )}
+              </QRContainer>
             </div>
 
             <Label

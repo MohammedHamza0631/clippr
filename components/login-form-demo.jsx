@@ -73,6 +73,11 @@ export default function LoginFormDemo () {
     }
   }, [data, error])
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await handleLogin();
+  };
+
   return (
     <div className=' w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-black'>
       <h2 className='font-bold text-xl text-neutral-200'>Login</h2>
@@ -80,16 +85,17 @@ export default function LoginFormDemo () {
         login to your account if you have one
       </p>
       {error && <Error message={error?.message} />}
-      <div className='my-8'>
+      <form onSubmit={handleSubmit} className='my-8'>
         <LabelInputContainer className='mb-4'>
           <Label className='text-neutral-200' htmlFor='email'>
             Email
           </Label>
           <Input
+            id='email'
             name='email'
             type='email'
             placeholder='Enter Email'
-            className='text-neutral-300 rounded-lg border border-neutral-800 w-full  bg-neutral-950 placeholder:text-neutral-700'
+            className='text-neutral-300 rounded-lg border border-neutral-800 w-full bg-neutral-950 placeholder:text-neutral-700'
             onChange={handleInputChange}
           />
           {errors.email && <Error message={errors.email} />}
@@ -99,19 +105,20 @@ export default function LoginFormDemo () {
             Password
           </Label>
           <Input
+            id='password'
             name='password'
             type='password'
             placeholder='••••••••'
-            className='text-neutral-300 rounded-lg border border-neutral-800 w-full  bg-neutral-950 placeholder:text-neutral-700'
+            className='text-neutral-300 rounded-lg border border-neutral-800 w-full bg-neutral-950 placeholder:text-neutral-700'
             onChange={handleInputChange}
           />
           {errors.password && <Error message={errors.password} />}
         </LabelInputContainer>
 
         <button
-          onClick={handleLogin}
-          className='bg-gradient-to-br relative group/btn from-zinc-900 to-zinc-900 block bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]'
           type='submit'
+          className='bg-gradient-to-br relative group/btn from-zinc-900 to-zinc-900 block bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]'
+          disabled={loading}
         >
           {loading ? <BeatLoader size={10} color='#36d7b7' /> : 'Log in'}
           <BottomGradient />
@@ -131,7 +138,7 @@ export default function LoginFormDemo () {
                   </button>
                   {<span className='text-center font-medium bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 to-rose-300'>Coming Soon!!</span>}
         </div>
-      </div>
+      </form>
     </div>
   )
 }
@@ -139,8 +146,8 @@ export default function LoginFormDemo () {
 const BottomGradient = () => {
   return (
     <>
-      <span className='group-hover/btn:opacity-100 block transition duration-500 opacity-0 absolute h-px w-full -bottom-px inset-x-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent' />
-      <span className='group-hover/btn:opacity-100 blur-sm block transition duration-500 opacity-0 absolute h-px w-1/2 mx-auto -bottom-px inset-x-10 bg-gradient-to-r from-transparent via-indigo-500 to-transparent' />
+      <span className='group-hover/btn:opacity-100 block transition duration-500 opacity-0 absolute h-px w-full -bottom-px inset-x-0 bg-gradient-to-r from-transparent via-rose-500 to-transparent' />
+      <span className='group-hover/btn:opacity-100 blur-sm block transition duration-500 opacity-0 absolute h-px w-1/2 mx-auto -bottom-px inset-x-10 bg-gradient-to-r from-transparent via-rose-500 to-transparent' />
     </>
   )
 }
