@@ -91,7 +91,7 @@ export default function Home () {
             <h2 className='text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-white/90 to-rose-300 mb-4'>
               Powerful Features for Smart Link Management
             </h2>
-            <p className='text-white/40 max-w-2xl mx-auto'>
+            <p className='text-white/60 max-w-2xl mx-auto'>
               Everything you need to create, manage, and analyze your shortened
               URLs in one place
             </p>
@@ -110,7 +110,7 @@ export default function Home () {
                 <h3 className='text-xl font-semibold text-white mb-2'>
                   {feature.title}
                 </h3>
-                <p className='text-white/40'>{feature.description}</p>
+                <p className='text-white/60'>{feature.description}</p>
               </motion.div>
             ))}
           </div>
@@ -120,21 +120,21 @@ export default function Home () {
       {/* CTA Section */}
       <section className='py-24 px-4 relative overflow-hidden'>
         <div className='absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-rose-500/10 blur-3xl' />
-        <div className='max-w-4xl mx-auto text-center relative'>
+        <div className='max-w-4xl mx-auto text-center flex flex-col items-center'>
           <h2 className='text-3xl md:text-4xl font-bold text-white mb-6'>
             Ready to Optimize Your Links?
           </h2>
-          <p className='text-white/40 mb-8 max-w-2xl mx-auto'>
+          <p className='text-white/60 mb-8 max-w-2xl mx-auto'>
             Join thousands of users who trust our platform for their URL
             shortening needs. Start tracking your link performance today.
           </p>
-          <Button
+          <GradientButton
             onClick={() => router.push('/auth')}
-            className='h-12 px-8 bg-gradient-to-r from-indigo-500 to-rose-500 hover:from-indigo-600 hover:to-rose-600 text-white'
+            className='font-bold text-md'
           >
-            Get Started for Free
-            <ArrowRight className='ml-2 h-4 w-4' />
-          </Button>
+            Get Started
+            <ArrowRight className='ml-2 mt-1 h-4 w-4' />
+          </GradientButton>
         </div>
       </section>
     </main>

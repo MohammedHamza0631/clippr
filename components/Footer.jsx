@@ -8,6 +8,7 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion'
 import { Heart } from 'lucide-react'
+import Link from 'next/link'
 
 export default function Footer() {
   const faqs = [
@@ -64,7 +65,7 @@ export default function Footer() {
           <p className='text-white/40 flex items-center justify-center gap-2'>
             Made with <Heart className='h-4 w-4 text-rose-400 animate-pulse' /> by{' '}
             <span className='bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 to-rose-300 font-medium'>
-              Hamza
+              <Link href='https://github.com/MohammedHamza0631' target='_blank'>Hamza</Link>
             </span>
           </p>
         </motion.div>
