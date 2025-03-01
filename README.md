@@ -25,6 +25,7 @@ See the deployed project [here](https://clipr.vercel.app).
 2. ⚙️ [Tech Stack](#tech-stack)
 3. 🔋 [Features](#features)
 4. 🤸 [Quick Start](#quick-start)
+5. 📊 [Database Schema](#database-schema)
 
 ## <a name="introduction">🤖 Introduction</a>
 
@@ -111,5 +112,34 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser to view the project.
+
+## <a name="database-schema">📊 Database Schema</a>
+
+The application uses two main tables in Supabase to store data:
+
+### urls Table
+
+| Column       | Type         | Description                           |
+|--------------|--------------|---------------------------------------|
+| id           | int8         | Primary key                           |
+| created_at   | timestamptz  | When the URL was created              |
+| original_url | text         | Original long URL                     |
+| short_url    | text         | Generated short URL identifier        |
+| custom_url   | text         | User-defined custom URL (optional)    |
+| user_id      | uuid         | Foreign key to the user               |
+| title        | text         | Title of the URL                      |
+| qr_code      | text         | QR code for the shortened URL         |
+
+### clicks Table
+
+| Column       | Type         | Description                           |
+|--------------|--------------|---------------------------------------|
+| id           | int8         | Primary key                           |
+| created_at   | timestamptz  | When the click occurred               |
+| url_id       | int8         | Foreign key to the urls table         |
+| city         | text         | City from which the URL was accessed  |
+| device       | text         | Device type used (mobile, desktop)    |
+| country      | text         | Country from which the URL was accessed|
+
 
 ---
