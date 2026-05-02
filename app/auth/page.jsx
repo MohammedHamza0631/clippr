@@ -2,10 +2,11 @@
 import SignupFormDemo from '@/components/signup-form-demo'
 import LoginFormDemo from '@/components/login-form-demo'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import React, { useEffect } from 'react'
+import React, { Suspense, useEffect } from 'react'
 import { UrlState } from '@/context/url-provider'
 import { useSearchParams, useRouter } from 'next/navigation'
-const AuthPage = () => {
+
+function AuthPageContent() {
   const searchParams = useSearchParams()
   const longLink = searchParams?.get('createNew')
   const router = useRouter()
@@ -15,6 +16,7 @@ const AuthPage = () => {
     if (isAuthenticated && !loading)
       router.push(`/dashboard?${longLink ? `createNew=${longLink}` : ''}`)
   }, [isAuthenticated, loading, router])
+
   return (
     <div className='mt-36 flex flex-col items-center gap-10 px-8'>
       <h1 className='text-4xl md:text-5xl font-extrabold'>
@@ -35,5 +37,11 @@ const AuthPage = () => {
     </div>
   )
 }
+
+const AuthPage = () => (
+  <Suspense>
+    <AuthPageContent />
+  </Suspense>
+)
 
 export default AuthPage
