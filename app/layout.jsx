@@ -1,19 +1,19 @@
 import localFont from 'next/font/local'
 import './globals.css'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import UrlProvider from '@/context/url-provider'
 import Script from 'next/script'
+import Footer from '@/components/Footer'
+import Header from '@/components/Header'
+import UrlProvider from '@/context/url-provider'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
   variable: '--font-geist-sans',
-  weight: '100 900'
+  weight: '100 900',
 })
 const geistMono = localFont({
   src: './fonts/GeistMonoVF.woff',
   variable: '--font-geist-mono',
-  weight: '100 900'
+  weight: '100 900',
 })
 
 export const metadata = {
@@ -21,22 +21,18 @@ export const metadata = {
   description: [
     'URL shortener with a focus on privacy and speed.',
     'Clippr is a URL shortener that allows you to shorten URLs and share them with your friends.',
-    'Gain insights into your audience and track your performance with Clippr.'
-  ]
+    'Gain insights into your audience and track your performance with Clippr.',
+  ],
 }
 
-export default function RootLayout ({ children }) {
+export default function RootLayout({ children }) {
   return (
-    <html lang='en'>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <UrlProvider>
           <Header />
-         
-          <main className='mt-20 min-h-screen container mx-auto px-2'>
-            {children}
-          </main>
+
+          <main className="mt-20 min-h-screen">{children}</main>
           <Footer />
         </UrlProvider>
       </body>

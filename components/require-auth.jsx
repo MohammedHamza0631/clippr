@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { BarLoader } from 'react-spinners'
 import { UrlState } from '@/context/url-provider'
 
-export default function RequireAuth ({ children }) {
+export default function RequireAuth({ children }) {
   const router = useRouter()
   const { loading, isAuthenticated } = UrlState()
 
@@ -15,7 +15,7 @@ export default function RequireAuth ({ children }) {
     }
   }, [isAuthenticated, loading, router])
 
-  if (loading) return <BarLoader width={'100%'} color='#36d7b7' />
+  if (loading) return <BarLoader width={'100%'} color="#36d7b7" />
 
   if (isAuthenticated) return children
 

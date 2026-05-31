@@ -171,37 +171,35 @@
 
 'use client'
 
+import { motion } from 'framer-motion'
+import { Home, LayoutDashboard, LogOut, Menu } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter, usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { BarLoader } from 'react-spinners'
-import { LayoutDashboard, LogOut, Menu, Home } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import useMediaQuery from '@/hooks/use-media-query'
 import { UrlState } from '@/context/url-provider'
-import useFetch from '@/hooks/use-fetch'
 import { logout } from '@/db/apiAuth'
-import { motion } from 'framer-motion'
+import useFetch from '@/hooks/use-fetch'
+import useMediaQuery from '@/hooks/use-media-query'
 import { cn } from '@/lib/utils'
 
-const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' }
-]
+const navItems = [{ icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' }]
 
-export default function Header () {
+export default function Header() {
   const router = useRouter()
   const pathname = usePathname()
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const { user, fetchUser } = UrlState()
   const { loading, fn: fnLogout } = useFetch(logout)
 
-  const handleNavigation = href => {
+  const handleNavigation = (href) => {
     if (!user) {
       router.push('/auth')
     } else {
@@ -216,7 +214,7 @@ export default function Header () {
     })
   }
 
-  const isActivePath = href => {
+  const isActivePath = (href) => {
     if (href.includes('?')) {
       return pathname === href.split('?')[0]
     }
@@ -228,43 +226,41 @@ export default function Header () {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className='fixed top-0 left-0 right-0 z-50'
+      className="fixed top-0 left-0 right-0 z-50"
     >
-      <nav className='max-w-2xl mx-auto px-4'>
-        <div className='bg-white/[0.03] backdrop-blur-md border border-[#23201b] rounded-full px-4 py-2 mt-4 shadow-lg ring-1 ring-white/[0.1]'>
-          <div className='flex items-center justify-between gap-4'>
+      <nav className="max-w-2xl mx-auto px-4">
+        <div className="bg-white/[0.03] backdrop-blur-md border border-[#23201b] rounded-full px-4 py-2 mt-4 shadow-lg ring-1 ring-white/[0.1]">
+          <div className="flex items-center justify-between gap-4">
             <button
               onClick={() => router.push('/')}
               className={cn(
                 'relative flex items-center gap-2 px-4 py-1.5 rounded-full transition-colors',
-                pathname === '/'
-                  ? 'text-white'
-                  : 'text-white/60 hover:text-white'
+                pathname === '/' ? 'text-white' : 'text-white/60 hover:text-white'
               )}
             >
-              <Home className='h-5 w-5' />
-              <span className='text-sm'>Home</span>
+              <Home className="h-5 w-5" />
+              <span className="text-sm">Home</span>
               {pathname === '/' && (
                 <motion.div
-                  layoutId='activeNav'
-                  className='absolute inset-0 bg-white/[0.08] -z-10 rounded-full'
+                  layoutId="activeNav"
+                  className="absolute inset-0 bg-white/[0.08] -z-10 rounded-full"
                   transition={{
                     type: 'spring',
                     stiffness: 300,
-                    damping: 30
+                    damping: 30,
                   }}
                 >
-                  <div className='absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 bg-white/60 rounded-t-full'>
-                    <div className='absolute w-12 h-6 bg-white/20 rounded-full blur-md -top-2 -left-2' />
-                    <div className='absolute w-8 h-6 bg-white/20 rounded-full blur-md -top-1' />
-                    <div className='absolute w-4 h-4 bg-white/20 rounded-full blur-sm top-0 left-2' />
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 bg-white/60 rounded-t-full">
+                    <div className="absolute w-12 h-6 bg-white/20 rounded-full blur-md -top-2 -left-2" />
+                    <div className="absolute w-8 h-6 bg-white/20 rounded-full blur-md -top-1" />
+                    <div className="absolute w-4 h-4 bg-white/20 rounded-full blur-sm top-0 left-2" />
                   </div>
                 </motion.div>
               )}
             </button>
 
             {isDesktop && (
-              <div className='flex items-center gap-2'>
+              <div className="flex items-center gap-2">
                 {navItems.map((item, index) => {
                   const Icon = item.icon
                   const isActive = isActivePath(item.href)
@@ -274,27 +270,25 @@ export default function Header () {
                       onClick={() => handleNavigation(item.href)}
                       className={cn(
                         'relative flex items-center gap-2 px-4 py-1.5 rounded-full transition-colors',
-                        isActive
-                          ? 'text-white'
-                          : 'text-white/60 hover:text-white'
+                        isActive ? 'text-white' : 'text-white/60 hover:text-white'
                       )}
                     >
-                      <Icon className='h-5 w-5' />
-                      <span className='text-sm'>{item.label}</span>
+                      <Icon className="h-5 w-5" />
+                      <span className="text-sm">{item.label}</span>
                       {isActive && (
                         <motion.div
-                          layoutId='activeNav'
-                          className='absolute inset-0 bg-white/[0.08] -z-10 rounded-full'
+                          layoutId="activeNav"
+                          className="absolute inset-0 bg-white/[0.08] -z-10 rounded-full"
                           transition={{
                             type: 'spring',
                             stiffness: 300,
-                            damping: 30
+                            damping: 30,
                           }}
                         >
-                          <div className='absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 bg-white/60 rounded-t-full'>
-                            <div className='absolute w-12 h-6 bg-white/20 rounded-full blur-md -top-2 -left-2' />
-                            <div className='absolute w-8 h-6 bg-white/20 rounded-full blur-md -top-1' />
-                            <div className='absolute w-4 h-4 bg-white/20 rounded-full blur-sm top-0 left-2' />
+                          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 bg-white/60 rounded-t-full">
+                            <div className="absolute w-12 h-6 bg-white/20 rounded-full blur-md -top-2 -left-2" />
+                            <div className="absolute w-8 h-6 bg-white/20 rounded-full blur-md -top-1" />
+                            <div className="absolute w-4 h-4 bg-white/20 rounded-full blur-sm top-0 left-2" />
                           </div>
                         </motion.div>
                       )}
@@ -304,7 +298,7 @@ export default function Header () {
               </div>
             )}
 
-            <div className='flex items-center'>
+            <div className="flex items-center">
               {user ? (
                 <>
                   {isDesktop ? (
@@ -316,12 +310,12 @@ export default function Header () {
                           'text-white/60 hover:text-white'
                         )}
                       >
-                        <LogOut className='h-5 w-5' />
-                        <span className='text-sm'>Logout</span>
+                        <LogOut className="h-5 w-5" />
+                        <span className="text-sm">Logout</span>
                       </button>
-                      <Avatar className='mr-[-0.25rem] h-10 w-10'>
+                      <Avatar className="mr-[-0.25rem] h-10 w-10">
                         <AvatarImage src={user?.user_metadata?.profile_pic} />
-                        <AvatarFallback className='bg-gradient-to-r from-indigo-500 to-rose-500'>
+                        <AvatarFallback className="bg-gradient-to-r from-indigo-500 to-rose-500">
                           {user?.user_metadata?.name[0]}
                         </AvatarFallback>
                       </Avatar>
@@ -329,25 +323,19 @@ export default function Header () {
                   ) : (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button
-                          variant='ghost'
-                          size='icon'
-                          className='hover:bg-white/[0.08]'
-                        >
+                        <Button variant="ghost" size="icon" className="hover:bg-white/[0.08]">
                           {/* <Menu className='h-5 w-5 text-white/60 hover:text-white' /> */}
-                          <Avatar className='mr-[-0.25rem] h-10 w-10'>
-                            <AvatarImage
-                              src={user?.user_metadata?.profile_pic}
-                            />
-                            <AvatarFallback className='bg-gradient-to-r from-indigo-500 to-rose-500'>
+                          <Avatar className="mr-[-0.25rem] h-10 w-10">
+                            <AvatarImage src={user?.user_metadata?.profile_pic} />
+                            <AvatarFallback className="bg-gradient-to-r from-indigo-500 to-rose-500">
                               {user?.user_metadata?.name[0]}
                             </AvatarFallback>
                           </Avatar>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
-                        align='end'
-                        className='w-48 bg-[#161616] border-white/[0.08] text-white'
+                        align="end"
+                        className="w-48 bg-[#161616] border-white/[0.08] text-white"
                       >
                         {navItems.map((item, index) => {
                           const Icon = item.icon
@@ -361,16 +349,16 @@ export default function Header () {
                               )}
                               onClick={() => handleNavigation(item.href)}
                             >
-                              <Icon className='mr-2 h-4 w-4' />
+                              <Icon className="mr-2 h-4 w-4" />
                               <span>{item.label}</span>
                               {isActive && (
                                 <motion.div
-                                  layoutId='activeNavMobile'
-                                  className='absolute inset-0 bg-white/[0.08] -z-10 rounded-md'
+                                  layoutId="activeNavMobile"
+                                  className="absolute inset-0 bg-white/[0.08] -z-10 rounded-md"
                                   transition={{
                                     type: 'spring',
                                     stiffness: 300,
-                                    damping: 30
+                                    damping: 30,
                                   }}
                                 />
                               )}
@@ -378,10 +366,10 @@ export default function Header () {
                           )
                         })}
                         <DropdownMenuItem
-                          className='text-rose-400 hover:text-rose-300 hover:bg-white/[0.08] cursor-pointer'
+                          className="text-rose-400 hover:text-rose-300 hover:bg-white/[0.08] cursor-pointer"
                           onClick={handleLogout}
                         >
-                          <LogOut className='mr-2 h-4 w-4' />
+                          <LogOut className="mr-2 h-4 w-4" />
                           <span>Logout</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -396,7 +384,7 @@ export default function Header () {
                     'bg-gradient-to-r from-indigo-500 to-rose-500 hover:from-indigo-600 hover:to-rose-600 text-white'
                   )}
                 >
-                  <span className='text-sm'>Login</span>
+                  <span className="text-sm">Login</span>
                 </button>
               )}
             </div>
@@ -405,11 +393,7 @@ export default function Header () {
       </nav>
 
       {loading && (
-        <BarLoader
-          className='fixed top-0 left-0 right-0 z-50'
-          width={'100%'}
-          color='#6366f1'
-        />
+        <BarLoader className="fixed top-0 left-0 right-0 z-50" width={'100%'} color="#6366f1" />
       )}
     </motion.div>
   )

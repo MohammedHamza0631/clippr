@@ -1,10 +1,10 @@
 'use client'
-import SignupFormDemo from '@/components/signup-form-demo'
-import LoginFormDemo from '@/components/login-form-demo'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useRouter, useSearchParams } from 'next/navigation'
 import React, { Suspense, useEffect } from 'react'
+import LoginFormDemo from '@/components/login-form-demo'
+import SignupFormDemo from '@/components/signup-form-demo'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { UrlState } from '@/context/url-provider'
-import { useSearchParams, useRouter } from 'next/navigation'
 
 function AuthPageContent() {
   const searchParams = useSearchParams()
@@ -18,19 +18,19 @@ function AuthPageContent() {
   }, [isAuthenticated, loading, router])
 
   return (
-    <div className='mt-36 flex flex-col items-center gap-10 px-8'>
-      <h1 className='text-4xl md:text-5xl font-extrabold'>
+    <div className="mt-36 flex flex-col items-center gap-10 px-8">
+      <h1 className="text-4xl md:text-5xl font-extrabold">
         {longLink ? 'Please Sign in first' : 'Login/Signup'}
       </h1>
-      <Tabs defaultValue='login' className='w-[300px] md:w-[500px]'>
-        <TabsList className='grid w-full grid-cols-2'>
-          <TabsTrigger value='login'>Login</TabsTrigger>
-          <TabsTrigger value='signup'>Signup</TabsTrigger>
+      <Tabs defaultValue="login" className="w-[300px] md:w-[500px]">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="login">Login</TabsTrigger>
+          <TabsTrigger value="signup">Signup</TabsTrigger>
         </TabsList>
-        <TabsContent value='login'>
+        <TabsContent value="login">
           <LoginFormDemo />
         </TabsContent>
-        <TabsContent value='signup'>
+        <TabsContent value="signup">
           <SignupFormDemo />
         </TabsContent>
       </Tabs>

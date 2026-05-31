@@ -1,11 +1,7 @@
-'use client';
+'use client'
 
-import RequireAuth from '@/components/require-auth';
+import RequireAuth from '@/components/require-auth'
 
 export default function DashboardLayout({ children }) {
-  return (
-    <RequireAuth>
-      {children}
-    </RequireAuth>
-  );
+  return <RequireAuth>{children}</RequireAuth>
 }

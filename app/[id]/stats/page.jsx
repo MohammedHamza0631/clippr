@@ -1,24 +1,21 @@
 'use client'
 
-import { useEffect } from 'react'
-import { BarLoader } from 'react-spinners'
 import { useRouter } from 'next/navigation'
-
-import {
-  getLongUrl
-} from '@/db/apiUrls'
+import { use, useEffect } from 'react'
+import { BarLoader } from 'react-spinners'
 import { storeClicks } from '@/db/apiClicks'
+import { getLongUrl } from '@/db/apiUrls'
 import useFetch from '@/hooks/use-fetch'
 
-export default function RedirectLink ({ params }) {
+export default function RedirectLink({ params }) {
   const router = useRouter()
-  const { id } = params
+  const { id } = use(params)
 
   const { loadings, data: urlData, fn: fnGetLongUrl } = useFetch(getLongUrl, id)
 
   const { loading: loadingClick, fn: fnStoreClicks } = useFetch(storeClicks, {
     id: urlData?.id,
-    originalUrl: urlData?.original_url
+    originalUrl: urlData?.original_url,
   })
 
   useEffect(() => {
@@ -40,7 +37,7 @@ export default function RedirectLink ({ params }) {
   if (loadings || loadingClick) {
     return (
       <>
-        <BarLoader width={'100%'} color='#36d7b7' />
+        <BarLoader width={'100%'} color="#36d7b7" />
         <br />
         <p>Redirecting...</p>
       </>
