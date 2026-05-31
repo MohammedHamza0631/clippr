@@ -4,6 +4,7 @@ import { BeatLoader } from 'react-spinners'
 import * as Yup from 'yup'
 import { signup } from '@/db/apiAuth'
 import useFetch from '@/hooks/use-fetch'
+import { UrlState } from '@/context/url-provider'
 import ErrorMessage from './error'
 import { Button } from './ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
@@ -32,9 +33,11 @@ export default function Signup() {
   }
 
   const { loading, error, fn: fnSignup, data } = useFetch(signup, formData)
+  const { fetchUser } = UrlState()
 
   useEffect(() => {
     if (error === null && data) {
+      fetchUser()
       router.push(`/dashboard${longLink ? `?createNew=${encodeURIComponent(longLink)}` : ''}`)
     }
   }, [error, loading])

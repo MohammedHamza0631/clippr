@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { signup } from '@/db/apiAuth'
 import useFetch from '@/hooks/use-fetch'
 import { cn } from '@/lib/utils'
+import { UrlState } from '@/context/url-provider'
 import ErrorMessage from './error'
 
 export default function SignupFormDemo() {
@@ -38,9 +39,11 @@ export default function SignupFormDemo() {
     }))
   }
   const { loading, error, fn: fnSignup, data } = useFetch(signup, formData)
+  const { fetchUser } = UrlState()
 
   useEffect(() => {
     if (error === null && data) {
+      fetchUser()
       router.push(`/dashboard${longLink ? `?createNew=${encodeURIComponent(longLink)}` : ''}`)
     }
   }, [error, loading])

@@ -62,7 +62,7 @@ export async function signup({ name, email, password, profile_pic }, req) {
     profile_pic_url = `${supabaseUrl}/storage/v1/object/public/${BUCKET_PROFILE_PICS}/${fileName}`
   }
 
-  const { data, error } = await supabase.auth.signUp({
+  const { error: signUpError } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -73,9 +73,16 @@ export async function signup({ name, email, password, profile_pic }, req) {
     },
   })
 
-  if (error) throw new Error(error.message)
+  if (signUpError) throw new Error(signUpError.message)
 
-  return data
+  const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+
+  if (signInError) throw new Error(signInError.message)
+
+  return signInData
 }
 
 export async function getCurrentUser(req) {
