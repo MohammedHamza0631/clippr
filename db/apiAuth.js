@@ -1,4 +1,5 @@
 import {
+  ALLOWED_IMAGE_TYPES,
   BUCKET_PROFILE_PICS,
   RATE_AUTH_LIMIT,
   RATE_AUTH_WINDOW,
@@ -46,13 +47,17 @@ export async function signup({ name, email, password, profile_pic }, req) {
 
   let profile_pic_url = null
   if (profile_pic) {
+    if (!ALLOWED_IMAGE_TYPES.includes(profile_pic.type)) {
+      throw new Error('Profile picture must be a JPEG, PNG, WebP, or GIF image')
+    }
+
     const fileName = `dp-${name.split(' ').join('-')}-${Math.random()}`
 
     const { error: storageError } = await supabase.storage
       .from(BUCKET_PROFILE_PICS)
-      .upload(fileName, profile_pic)
+      .upload(fileName, profile_pic, { contentType: profile_pic.type })
 
-    if (storageError) throw new Error(storageError.message)
+    if (storageError) throw new Error('Failed to upload profile picture')
 
     profile_pic_url = `${supabaseUrl}/storage/v1/object/public/${BUCKET_PROFILE_PICS}/${fileName}`
   }

@@ -14,7 +14,16 @@ export async function getClicksForUrls(urlIds) {
   return data
 }
 
-export async function getClicksForUrl(url_id) {
+export async function getClicksForUrl({ url_id, user_id }) {
+  const { data: urlData, error: urlError } = await supabase
+    .from('urls')
+    .select('id')
+    .eq('id', url_id)
+    .eq('user_id', user_id)
+    .single()
+
+  if (urlError || !urlData) throw new Error('Unable to load Stats')
+
   const { data, error } = await supabase.from('clicks').select('*').eq('url_id', url_id)
 
   if (error) {

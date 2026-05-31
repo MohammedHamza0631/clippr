@@ -64,7 +64,7 @@ export default function Login() {
   useEffect(() => {
     // console.log(data, error)
     if (data && error === null) {
-      router.push(`/dashboard?${longLink ? `createNew=${longLink}` : ''}`)
+      router.push(`/dashboard${longLink ? `?createNew=${encodeURIComponent(longLink)}` : ''}`)
       fetchUser()
     }
   }, [data, error])

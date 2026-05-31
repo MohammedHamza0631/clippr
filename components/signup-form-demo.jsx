@@ -41,7 +41,7 @@ export default function SignupFormDemo() {
 
   useEffect(() => {
     if (error === null && data) {
-      router.push(`/dashboard?${longLink ? `createNew=${longLink}` : ''}`)
+      router.push(`/dashboard${longLink ? `?createNew=${encodeURIComponent(longLink)}` : ''}`)
     }
   }, [error, loading])
 

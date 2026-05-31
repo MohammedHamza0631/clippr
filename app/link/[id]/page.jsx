@@ -41,9 +41,9 @@ const LinkPage = ({ params }) => {
 
   const { loading, data: url, fn: fnGetUrl, error } = useFetch(getUrl, { id, user_id: user?.id })
 
-  const { loading: loadingStats, data: stats, fn: fnStats } = useFetch(getClicksForUrl, id)
+  const { loading: loadingStats, data: stats, fn: fnStats } = useFetch(getClicksForUrl, { url_id: id, user_id: user?.id })
 
-  const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, id)
+  const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, { id, user_id: user?.id })
 
   useEffect(() => {
     if (user && user.id) {

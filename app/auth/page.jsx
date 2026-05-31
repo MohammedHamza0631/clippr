@@ -14,7 +14,7 @@ function AuthPageContent() {
 
   useEffect(() => {
     if (isAuthenticated && !loading)
-      router.push(`/dashboard?${longLink ? `createNew=${longLink}` : ''}`)
+      router.push(`/dashboard${longLink ? `?createNew=${encodeURIComponent(longLink)}` : ''}`)
   }, [isAuthenticated, loading, router])
 
   return (

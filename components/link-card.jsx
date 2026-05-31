@@ -7,11 +7,13 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 import { BeatLoader } from 'react-spinners'
 import { BASE_APP_URL, FEEDBACK_TIMEOUT_MS, QR_THUMBNAIL_SIZE } from '@/lib/constants'
+import { UrlState } from '@/context/url-provider'
 import { deleteUrl } from '@/db/apiUrls'
 import useFetch from '@/hooks/use-fetch'
 import { Button } from './ui/button'
 
 export default function LinkCard({ url, fetchUrls }) {
+  const { user } = UrlState()
   const [copied, setCopied] = useState(false)
   const [downloading, setDownloading] = useState(false)
 
@@ -47,7 +49,7 @@ export default function LinkCard({ url, fetchUrls }) {
     setTimeout(() => setCopied(false), FEEDBACK_TIMEOUT_MS)
   }
 
-  const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, url.id)
+  const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, { id: url.id, user_id: user?.id })
 
   return (
     <div className="bg-white/[0.02] border border-white/[0.08] hover:bg-white/[0.04] transition-all duration-300 rounded-lg overflow-hidden">

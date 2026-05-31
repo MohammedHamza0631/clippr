@@ -9,6 +9,7 @@ import {
   SHORT_URL_LENGTH,
   SUPABASE_NO_ROWS_CODE,
 } from '@/lib/constants'
+import { isSafeUrl } from '@/lib/utils'
 import { getIdentifier, rateLimit } from './rate-limiter'
 import supabase, { supabaseUrl } from './supabase'
 
@@ -119,38 +120,51 @@ export async function createUrl({ title, longUrl, customUrl, user_id }, qrcode, 
     )
   }
 
-  const short_url = Math.random().toString(36).substr(2, SHORT_URL_LENGTH)
-  const fileName = `qr-${short_url}`
-
-  const { error: storageError } = await supabase.storage.from(BUCKET_QR_CODES).upload(fileName, qrcode)
-
-  if (storageError) throw new Error(storageError.message)
-
-  const qr_code = `${supabaseUrl}/storage/v1/object/public/${BUCKET_QR_CODES}/${fileName}`
-
-  const { data, error } = await supabase
-    .from('urls')
-    .insert([
-      {
-        title,
-        user_id,
-        original_url: longUrl,
-        custom_url: customUrl || null,
-        short_url,
-        qr_code,
-      },
-    ])
-    .select()
-
-  if (error) {
-    console.error(error)
-    throw new Error('Error creating short URL')
+  if (!isSafeUrl(longUrl)) {
+    throw new Error('URL must use http or https')
   }
+
+  const chars = '0123456789abcdefghijklmnopqrstuvwxyz'
+  const randomShortUrl = () => {
+    const bytes = new Uint8Array(SHORT_URL_LENGTH)
+    crypto.getRandomValues(bytes)
+    return Array.from(bytes, (b) => chars[b % chars.length]).join('')
+  }
+
+  let data = null
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const short_url = randomShortUrl()
+    const fileName = `qr-${short_url}`
+
+    const { error: storageError } = await supabase.storage
+      .from(BUCKET_QR_CODES)
+      .upload(fileName, qrcode)
+    if (storageError) throw new Error('Error uploading QR code')
+
+    const qr_code = `${supabaseUrl}/storage/v1/object/public/${BUCKET_QR_CODES}/${fileName}`
+
+    const { data: inserted, error } = await supabase
+      .from('urls')
+      .insert([{ title, user_id, original_url: longUrl, custom_url: customUrl || null, short_url, qr_code }])
+      .select()
+
+    if (!error) {
+      data = inserted
+      break
+    }
+    if (error.code !== '23505') {
+      console.error(error)
+      throw new Error('Error creating short URL')
+    }
+    // duplicate short_url — retry with a new one
+  }
+
+  if (!data) throw new Error('Failed to generate a unique short URL. Please try again.')
 
   return data
 }
 
-export async function deleteUrl(id, req) {
+export async function deleteUrl({ id, user_id }, req) {
   // Check rate limit for URL deletion
   const identifier = getIdentifier(req)
   const rateLimitResult = await rateLimit(
@@ -167,7 +181,11 @@ export async function deleteUrl(id, req) {
     )
   }
 
-  const { data, error } = await supabase.from('urls').delete().eq('id', id)
+  const { data, error } = await supabase
+    .from('urls')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user_id)
 
   if (error) {
     console.error(error)
