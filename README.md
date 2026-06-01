@@ -1,145 +1,118 @@
 <div align="center">
- <br />
-    <a href="https://clipr.vercel.app" target="_blank">
-      <img src="public/cover.png" alt="Project Banner" style="border-radius: 12px;">
-    </a>
+  <br />
+  <a href="https://clipr.vercel.app" target="_blank">
+    <img src="public/og.png" alt="Clippr" style="border-radius: 12px;">
+  </a>
   <br />
 
   <div>
-    <img src="https://img.shields.io/badge/-Next_JS-black?style=for-the-badge&logoColor=white&logo=nextdotjs&color=000000" alt="nextdotjs" />
+    <img src="https://img.shields.io/badge/-Next.js_16-black?style=for-the-badge&logoColor=white&logo=nextdotjs&color=000000" alt="nextjs" />
     <img src="https://img.shields.io/badge/-Supabase-green?style=for-the-badge&logoColor=white&logo=supabase&color=239b56" alt="supabase" />
     <img src="https://img.shields.io/badge/-Javascript-black?style=for-the-badge&logoColor=black&logo=javascript&color=f4d03f" alt="javascript" />
-    <img src="https://img.shields.io/badge/-ShadCN_UI-black?style=for-the-badge&logoColor=white&logo=shadcnui&color=000000" alt="shadcnui" />
     <img src="https://img.shields.io/badge/-Tailwind_CSS-black?style=for-the-badge&logoColor=white&logo=tailwindcss&color=06B6D4" alt="tailwindcss" />
+    <img src="https://img.shields.io/badge/-Upstash_Redis-black?style=for-the-badge&logoColor=white&logo=redis&color=DC382D" alt="redis" />
   </div>
-  
-  <h3 align="center">Clipper - A Full Stack URL Shortener</h3>
-  
-See the deployed project [here](https://clipr.vercel.app).
+
+  <h3 align="center">Clippr — Short links that tell you everything</h3>
+
+  See the live project at <a href="https://clipr.vercel.app">clipr.vercel.app</a>.
 </div>
 
+## Table of Contents
 
-## 📋 <a name="table">Table of Contents</a>
+1. [Introduction](#introduction)
+2. [Tech Stack](#tech-stack)
+3. [Features](#features)
+4. [Quick Start](#quick-start)
+5. [Environment Variables](#environment-variables)
+6. [Database Schema](#database-schema)
 
-1. 🤖 [Introduction](#introduction)
-2. ⚙️ [Tech Stack](#tech-stack)
-3. 🔋 [Features](#features)
-4. 🤸 [Quick Start](#quick-start)
-5. 📊 [Database Schema](#database-schema)
+## Introduction
 
-## <a name="introduction">🤖 Introduction</a>
+Clippr is a full-stack URL shortener built with **Next.js 16**, **Supabase**, and **Tailwind CSS**. Paste a long URL, get a short link and a QR code, then track every click by city and device.
 
-Clipper is a full-stack URL Shortener built using **Next.js**, **Supabase**, **ShadCN UI**, and **Tailwind CSS**. It allows users to **shorten long URLs**, **track analytics**, and **manage their links** efficiently.
+## Tech Stack
 
-With Clipper, users can:
-- Generate short, shareable links.
-- View detailed analytics for each shortened URL.
-- Manage and organize their links from a user-friendly dashboard.
+| Layer | Choice |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Language | JavaScript (JSX) |
+| Styling | Tailwind CSS v3 + custom design system |
+| Auth & DB | Supabase (email/password, Postgres, Storage) |
+| Rate limiting | Upstash Redis |
+| Deployment | Vercel |
 
-The project is designed for simplicity, and ease of use, making URL shortening seamless and efficient.
+## Features
 
+- **URL Shortening** — Generate a short link from any URL in seconds
+- **Custom aliases** — Choose your own slug (e.g. `clipr.vercel.app/launch`)
+- **QR codes** — Every link gets a high-res QR code, live preview while typing
+- **Click analytics** — Track total clicks, top cities, and device breakdown
+- **User dashboard** — View, search, copy, and delete all your links
+- **Authentication** — Secure email/password auth via Supabase
+- **Rate limiting** — Sliding-window rate limiting on all API operations
+- **Mobile-friendly** — Vaul drawer on mobile for creating links
 
-## <a name="tech-stack">⚙️ Tech Stack</a>
+## Quick Start
 
-- Next.js
-- JavaScript
-- Supabase
-- ShadCN UI
-- Tailwind CSS
-
-## <a name="features">🔋 Features</a>
-
-👉 **Shorten Long URLs** – Easily convert long and complex URLs into short, manageable links.
-
-👉 **User Authentication** – Secure authentication using Supabase with email/password.
-
-👉 **Custom Short URLs** – Allows users to create custom slugs for personalized short URLs.
-
-👉 **Dashboard for Link Management** – Users can view, edit, and delete their shortened links from an intuitive dashboard.
-
-### 👉 **Analytics Tracking**
-
-🔹 **Location Stats** – Track the geographic locations of visitors who click on your shortened links.
-
-🔹 **Device Stats** – Monitor the types of devices (mobile, desktop, tablet) used to access your links.
-
-👉 **SEO-Friendly and Optimized Performance** – Fast-loading, optimized pages built with Next.js and Tailwind CSS.
-
-## <a name="quick-start">🤸 Quick Start</a>
-
-Follow these steps to set up the project locally on your machine.
-
-**Prerequisites**
-
-Make sure you have the following installed on your machine:
-
-- [Git](https://git-scm.com/)
-- [Node.js](https://nodejs.org/en)
-- [npm](https://www.npmjs.com/) (Node Package Manager)
-
-**Cloning the Repository**
+**Prerequisites:** Git, Node.js ≥ 20, pnpm
 
 ```bash
 git clone https://github.com/MohammedHamza0631/clippr.git
 cd clippr
+pnpm install
 ```
 
-**Installation**
-
-Install the project dependencies using npm:
+Copy `.env.local.example` to `.env.local` and fill in the values (see below), then:
 
 ```bash
-npm install
+pnpm dev
 ```
 
-**Set Up Environment Variables**
+Open [http://localhost:3000](http://localhost:3000).
 
-Create a new file named `.env` in the root of your project and add the following content:
+## Environment Variables
+
+Create `.env.local` in the project root:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=<SUPABASE_PROJECT_URL>
-NEXT_PUBLIC_SUPABASE_KEY=<SUPABASE_ANON_KEY>
-NEXT_PUBLIC_IPINFO_TOKEN=<IPINFO_API_TOKEN>
+# Supabase — get from your project's API settings
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
+
+# Upstash Redis — for rate limiting (falls back to in-memory if omitted)
+UPSTASH_REDIS_REST_URL=<url>
+UPSTASH_REDIS_REST_TOKEN=<token>
+
+# ipinfo.io — for geolocation on clicks
+IPINFO_TOKEN=<token>
 ```
 
-Replace the placeholder values with your actual credentials. You can obtain these credentials by signing up on the corresponding websites from [Supabase](https://supabase.com/), and [Ipinfo](https://ipinfo.io/).
+> **Note:** `SUPABASE_SERVICE_ROLE_KEY` bypasses Row Level Security and must never be prefixed with `NEXT_PUBLIC_`.
 
+## Database Schema
 
-**Running the Project**
+### `urls`
 
-```bash
-npm run dev
-```
+| Column | Type | Description |
+|---|---|---|
+| id | int8 | Primary key |
+| created_at | timestamptz | Creation time |
+| user_id | uuid | FK → auth.users |
+| title | text | Link title |
+| original_url | text | Destination URL |
+| short_url | text | 6-char generated code |
+| custom_url | text | User-defined alias (optional) |
+| qr_code | text | Supabase Storage URL |
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to view the project.
+### `clicks`
 
-## <a name="database-schema">📊 Database Schema</a>
-
-The application uses two main tables in Supabase to store data:
-
-### urls Table
-
-| Column       | Type         | Description                           |
-|--------------|--------------|---------------------------------------|
-| id           | int8         | Primary key                           |
-| created_at   | timestamptz  | When the URL was created              |
-| original_url | text         | Original long URL                     |
-| short_url    | text         | Generated short URL identifier        |
-| custom_url   | text         | User-defined custom URL (optional)    |
-| user_id      | uuid         | Foreign key to the user               |
-| title        | text         | Title of the URL                      |
-| qr_code      | text         | QR code for the shortened URL         |
-
-### clicks Table
-
-| Column       | Type         | Description                           |
-|--------------|--------------|---------------------------------------|
-| id           | int8         | Primary key                           |
-| created_at   | timestamptz  | When the click occurred               |
-| url_id       | int8         | Foreign key to the urls table         |
-| city         | text         | City from which the URL was accessed  |
-| device       | text         | Device type used (mobile, desktop)    |
-| country      | text         | Country from which the URL was accessed|
-
-
----
+| Column | Type | Description |
+|---|---|---|
+| id | int8 | Primary key |
+| created_at | timestamptz | Click time |
+| url_id | int8 | FK → urls |
+| city | text | Visitor city |
+| country | text | Visitor country |
+| device | text | `mobile` / `desktop` / `tablet` |
