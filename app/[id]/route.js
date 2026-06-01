@@ -1,8 +1,7 @@
 import Bowser from 'bowser'
 import { NextResponse } from 'next/server'
-import { CLICK_REDIRECT_DELAY_MS, IPINFO_API_BASE } from '@/lib/constants'
-import { getLongUrl } from '@/db/apiUrls'
-import supabase from '@/db/supabase'
+import { IPINFO_API_BASE } from '@/lib/constants'
+import supabaseAdmin from '@/db/supabase-admin'
 import { isSafeUrl } from '@/lib/utils'
 
 function isValidIpv4(ip) {
@@ -14,8 +13,13 @@ function isValidIpv4(ip) {
 export async function GET(request, { params }) {
   const { id } = await params
 
-  const shortLinkData = await getLongUrl(id)
-  if (!shortLinkData || !shortLinkData.original_url) {
+  const { data: shortLinkData, error: urlError } = await supabaseAdmin
+    .from('urls')
+    .select('id, original_url')
+    .or(`short_url.eq.${id},custom_url.eq.${id}`)
+    .single()
+
+  if (urlError || !shortLinkData?.original_url) {
     return NextResponse.json({ error: 'Short link not found' }, { status: 404 })
   }
 
@@ -40,22 +44,16 @@ export async function GET(request, { params }) {
   }
 
   const userAgent = request.headers.get('user-agent') || ''
-  const parsed = Bowser.parse(userAgent)
-  const device = parsed.platform?.type
+  const device = Bowser.parse(userAgent).platform?.type
 
-  const { error } = await supabase.from('clicks').insert({
+  const { error: clickError } = await supabaseAdmin.from('clicks').insert({
     url_id: shortLinkData.id,
-    city: city,
-    country: country,
-    device: device,
+    city,
+    country,
+    device,
   })
-  await new Promise((resolve) => setTimeout(resolve, CLICK_REDIRECT_DELAY_MS))
-  if (error) {
-    console.error('Error inserting click:', error.message)
-    // if error then also redirect, don't want users to get stuck
-    return NextResponse.redirect(shortLinkData.original_url, 302)
-  }
 
-  // 5) Do a server-side 302 redirect to the original URL
+  if (clickError) console.error('Error inserting click:', clickError.message)
+
   return NextResponse.redirect(shortLinkData.original_url, 302)
 }
