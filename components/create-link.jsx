@@ -1,374 +1,399 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useEffect, useRef, useState } from 'react'
-import { QRCode } from 'react-qrcode-logo'
-import { BeatLoader } from 'react-spinners'
+import { useEffect, useRef, useState } from 'react'
 import { Drawer } from 'vaul'
-import * as yup from 'yup'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import GradientButton from '@/components/ui/GradientButton'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { QRCode } from 'react-qrcode-logo'
+import { Btn, Field, Icon, useToast } from '@/components/ds'
 import { UrlState } from '@/context/url-provider'
 import { createUrl } from '@/db/apiUrls'
 import useFetch from '@/hooks/use-fetch'
 import useMediaQuery from '@/hooks/use-media-query'
-import { cn } from '@/lib/utils'
-import {
-  BASE_APP_DOMAIN,
-  FEEDBACK_TIMEOUT_MS,
-  QR_BG_COLOR,
-  QR_EYE_RADIUS,
-  QR_FG_COLOR,
-  QR_SIZE,
-  QR_STYLE,
-} from '@/lib/constants'
-import ErrorMessage from './error'
-import { ShimmerButton } from './ui/shimmer-button'
+import { BASE_APP_DOMAIN, QR_BG_COLOR, QR_EYE_RADIUS, QR_FG_COLOR, QR_SIZE, QR_STYLE } from '@/lib/constants'
 
-// First, let's create a reusable QR container component
-const QRContainer = ({ children, showQR, qrRef }) => {
-  const [copied, setCopied] = useState(false)
-
-  const copyQRCode = async () => {
-    try {
-      const canvas = qrRef.current.canvasRef.current
-      canvas.toBlob(async (blob) => {
-        const item = new ClipboardItem({ 'image/png': blob })
-        await navigator.clipboard.write([item])
-        setCopied(true)
-        setTimeout(() => setCopied(false), FEEDBACK_TIMEOUT_MS)
-      })
-    } catch (err) {
-      console.error('Failed to copy QR code:', err)
+/* ---- Desktop backdrop ---- */
+function Backdrop({ onClose, children }) {
+  useEffect(() => {
+    const h = (e) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', h)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', h)
+      document.body.style.overflow = ''
     }
-  }
+  }, [onClose])
 
   return (
-    <div className="relative w-full h-full rounded-xl bg-white dark:bg-zinc-900 p-4">
-      {/* Content container */}
-      <div className="relative h-full w-full flex flex-col items-center justify-center gap-2">
-        {!showQR ? (
-          <>
-            <div className="w-16 h-16 rounded-lg border-2 border-dashed border-zinc-300 dark:border-zinc-700 flex items-center justify-center">
-              <svg
-                className="w-8 h-8 text-zinc-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-            </div>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 text-center">
-              Enter a long link to
-              <br />
-              generate a QR code
-            </p>
-          </>
-        ) : (
-          <div className="relative w-full h-full flex items-center justify-center">
-            <div className="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-lg">{children}</div>
-            {/* Copy button */}
-            <button
-              className="absolute top-2 right-2 p-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors"
-              onClick={copyQRCode}
-              title="Copy QR Code"
-            >
-              <span className="sr-only">{copied ? 'Copied' : 'Copy'}</span>
-              <svg
-                className={`w-4 h-4 text-zinc-600 dark:text-zinc-400 transition-all duration-300 ${
-                  copied ? 'scale-0' : 'scale-100'
-                }`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                />
-              </svg>
-              <svg
-                className={`absolute inset-0 m-auto w-4 h-4 text-zinc-600 dark:text-zinc-400 transition-all duration-300 ${
-                  copied ? 'scale-100' : 'scale-0'
-                }`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </button>
-          </div>
-        )}
-      </div>
+    <div
+      onMouseDown={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(12,12,20,.5)',
+        backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 24, animation: 'fadeIn .2s',
+      }}
+    >
+      {children}
     </div>
   )
 }
 
 export default function CreateLink({ fetchUrls }) {
-  const isDesktop = useMediaQuery('(min-width: 768px)')
-  const [open, setOpen] = useState(false)
   const { user } = UrlState()
-
   const router = useRouter()
-  const ref = useRef()
   const searchParams = useSearchParams()
+  const toast = useToast()
+  const qrRef = useRef()
+  const isMobile = useMediaQuery('(max-width: 940px)')
 
-  const longLink = searchParams.get('createNew')
+  const longLink = searchParams?.get('createNew')
+  const [open, setOpen] = useState(!!longLink)
 
+  const [title, setTitle] = useState('')
+  const [url, setUrl] = useState(longLink || '')
+  const [alias, setAlias] = useState('')
   const [errors, setErrors] = useState({})
+  const [formErr, setFormErr] = useState('')
 
-  const [formValues, setFormValues] = useState({
-    title: '',
-    longUrl: longLink ? longLink : '',
-    customUrl: '',
+  const isValidPreview = (() => {
+    if (!url.trim()) return false
+    try {
+      const normalized = url.match(/^https?:\/\//) ? url : 'https://' + url
+      new URL(normalized)
+      return true
+    } catch { return false }
+  })()
+  const previewUrl = isValidPreview
+    ? (url.match(/^https?:\/\//) ? url : 'https://' + url)
+    : ''
+
+  const { loading, error, data, fn: fnCreateUrl } = useFetch(createUrl, {
+    title, longUrl: previewUrl, customUrl: alias, user_id: user?.id,
   })
-
-  const schema = yup.object().shape({
-    title: yup.string().required('Title is required'),
-    longUrl: yup.string().url('Must be a valid URL').required('Long URL is required'),
-    customUrl: yup.string(),
-  })
-
-  const handleChange = (e) => {
-    setFormValues({
-      ...formValues,
-      [e.target.id]: e.target.value,
-    })
-  }
-  const {
-    loading,
-    error,
-    data,
-    fn: fnCreateUrl,
-  } = useFetch(createUrl, { ...formValues, user_id: user.id })
 
   useEffect(() => {
     if (error === null && data) {
+      toast?.('Link created!', 'success')
+      fetchUrls?.()
       router.push(`/link/${data[0].id}`)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, data])
 
-  const createNewLink = async () => {
-    setErrors([])
+  const validate = () => {
+    const er = {}
+    if (!title.trim()) er.title = 'Give your link a title'
+    if (!url.trim()) er.url = 'Paste the URL you want to shorten'
+    else if (!isValidPreview) er.url = "That doesn't look like a valid URL"
+    if (alias && !/^[a-z0-9-]+$/i.test(alias)) er.alias = 'Use only letters, numbers and hyphens'
+    setErrors(er)
+    return Object.keys(er).length === 0
+  }
+
+  const submit = async (e) => {
+    e.preventDefault()
+    setFormErr('')
+    if (!validate()) return
     try {
-      await schema.validate(formValues, { abortEarly: false })
-
-      const canvas = ref.current.canvasRef.current
+      const canvas = qrRef.current?.canvasRef?.current
+      if (!canvas) { await fnCreateUrl(null); return }
       const blob = await new Promise((resolve) => canvas.toBlob(resolve))
-
-      await fnCreateUrl(blob).then(() => fetchUrls())
-    } catch (e) {
-      const newErrors = {}
-
-      e?.inner?.forEach((err) => {
-        newErrors[err.path] = err.message
-      })
-
-      setErrors(newErrors)
+      await fnCreateUrl(blob)
+    } catch (err) {
+      setFormErr(err.message || 'Something went wrong')
     }
   }
-  const handleDrawerClose = () => {
+
+  const handleClose = () => {
     setOpen(false)
+    if (longLink) router.push('/dashboard')
   }
 
-  // Update QR code props for better dark mode
-  const qrCodeProps = {
-    qrStyle: QR_STYLE,
-    eyeRadius: QR_EYE_RADIUS,
-    size: QR_SIZE,
-    bgColor: QR_BG_COLOR,
-    fgColor: QR_FG_COLOR,
-    className: `w-full h-full max-w-[${QR_SIZE}px]`,
-  }
+  const triggerBtn = (
+    <Btn icon="plus" size="lg" onClick={() => setOpen(true)}>
+      Create new link
+    </Btn>
+  )
 
-  if (isDesktop) {
+  /* ---- Mobile: Vaul drawer ---- */
+  if (isMobile) {
     return (
-      <Dialog
-        defaultOpen={longLink}
-        onOpenChange={(res) => {
-          if (!res) {
-            router.push('/dashboard')
-          }
-        }}
-      >
-        <DialogTrigger asChild>
-          <ShimmerButton className="shadow-2xl">
-            <span className="whitespace-pre-wrap text-center text-xs leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
-              Create Link
-            </span>
-          </ShimmerButton>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create a new Link</DialogTitle>
-          </DialogHeader>
-          <div className="relative w-full aspect-square max-w-[300px] mx-auto">
-            <QRContainer showQR={!!formValues?.longUrl} qrRef={ref}>
-              {formValues?.longUrl && (
-                <QRCode {...qrCodeProps} ref={ref} value={formValues.longUrl} />
-              )}
-            </QRContainer>
-          </div>
-          <Input
-            id="title"
-            placeholder="Short Link's Title"
-            value={formValues.title}
-            className="bg-zinc-950 text-neutral-300"
-            onChange={handleChange}
-          />
-          {errors.title && <ErrorMessage message={errors.title} />}
-          <Input
-            id="longUrl"
-            placeholder="Enter your Loooong URL"
-            value={formValues.longUrl}
-            className="bg-zinc-950 text-neutral-300"
-            onChange={handleChange}
-          />
-          {errors.longUrl && <ErrorMessage message={errors.longUrl} />}
-          <div className="flex items-center gap-2">
-            <Badge className="p-2 bg-zinc-400">{BASE_APP_DOMAIN}</Badge> /
-            <Input
-              id="customUrl"
-              placeholder="Custom Link (optional)"
-              value={formValues.customUrl}
-              className="bg-zinc-950 text-neutral-300"
-              onChange={handleChange}
+      <>
+        {triggerBtn}
+        {/* off-screen full-size QR for blob generation */}
+        {previewUrl && (
+          <div style={{ position: 'fixed', left: -9999, top: -9999, pointerEvents: 'none' }}>
+            <QRCode
+              ref={qrRef}
+              value={previewUrl}
+              size={QR_SIZE}
+              qrStyle={QR_STYLE}
+              eyeRadius={QR_EYE_RADIUS}
+              bgColor={QR_BG_COLOR}
+              fgColor={QR_FG_COLOR}
             />
           </div>
-          {error && <ErrorMessage message={errors.message} />}
-          <DialogFooter className="sm:justify-start">
-            <GradientButton
-              type="button"
-              onClick={createNewLink}
-              disabled={loading}
-              className="w-fit h-12 flex items-center justify-center px-12 rounded-lg"
-            >
-              {loading ? <BeatLoader size={10} color="rose-400" /> : 'Create'}
-            </GradientButton>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        )}
+        <Drawer.Root open={open} onOpenChange={(v) => { if (!v) handleClose() }}>
+          <Drawer.Portal>
+            <Drawer.Overlay style={{
+              position: 'fixed', inset: 0, zIndex: 999,
+              background: 'rgba(12,12,20,.55)',
+              backdropFilter: 'blur(3px)', WebkitBackdropFilter: 'blur(3px)',
+            }} />
+            <Drawer.Content style={{
+              position: 'fixed', bottom: 0, left: 0, right: 0,
+              zIndex: 1000,
+              background: 'var(--surface)',
+              borderTop: '1px solid var(--border)',
+              borderRadius: '20px 20px 0 0',
+              maxHeight: '92vh',
+              display: 'flex',
+              flexDirection: 'column',
+              outline: 'none',
+            }}>
+              {/* drag handle */}
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 0 4px', flexShrink: 0 }}>
+                <div style={{ width: 36, height: 4, borderRadius: 9, background: 'var(--border-2)' }} />
+              </div>
+
+              <Drawer.Title style={{ display: 'none' }}>Create a short link</Drawer.Title>
+
+              {/* scrollable body */}
+              <div style={{ overflowY: 'auto', padding: '8px 22px 40px', flex: 1 }}>
+                {/* header */}
+                <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                  <div className="col" style={{ gap: 3 }}>
+                    <span className="eyebrow">New link</span>
+                    <h2 style={{ fontSize: 22 }}>Create a short link</h2>
+                  </div>
+                  <button className="iconbtn" onClick={handleClose} aria-label="close" style={{ flex: 'none' }}>
+                    <Icon name="x" size={18} />
+                  </button>
+                </div>
+
+                {/* compact QR preview */}
+                {previewUrl && (
+                  <div
+                    className="row"
+                    style={{
+                      gap: 14, padding: '12px 14px', marginBottom: 18,
+                      background: 'var(--surface-2)', borderRadius: 'var(--r-md)',
+                      border: '1px solid var(--border)',
+                    }}
+                  >
+                    <div className="qr-card" style={{ padding: 6, flex: 'none' }}>
+                      <QRCode
+                        value={previewUrl}
+                        size={60}
+                        qrStyle={QR_STYLE}
+                        eyeRadius={QR_EYE_RADIUS}
+                        bgColor={QR_BG_COLOR}
+                        fgColor={QR_FG_COLOR}
+                      />
+                    </div>
+                    <div className="col" style={{ gap: 3, minWidth: 0 }}>
+                      <span style={{ fontSize: 12, color: 'var(--ink-3)', fontWeight: 600 }}>QR preview</span>
+                      <span className="mono" style={{ fontSize: 13, fontWeight: 600, color: 'var(--primary-2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {BASE_APP_DOMAIN}/{alias.trim() || '••••••'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* form */}
+                <form className="col" style={{ gap: 17 }} onSubmit={submit} noValidate>
+                  {(formErr || error) && (
+                    <div className="form-error">
+                      <Icon name="alert" size={18} /> {formErr || error?.message}
+                    </div>
+                  )}
+                  <Field
+                    label="Title"
+                    placeholder="e.g. Spring product launch"
+                    value={title}
+                    onChange={(e) => { setTitle(e.target.value); setErrors((x) => ({ ...x, title: '' })) }}
+                    error={errors.title}
+                  />
+                  <Field
+                    label="Long URL"
+                    mono
+                    leadIcon="link"
+                    placeholder="https://example.com/very/long/path"
+                    value={url}
+                    onChange={(e) => { setUrl(e.target.value); setErrors((x) => ({ ...x, url: '' })) }}
+                    error={errors.url}
+                  />
+                  <Field
+                    label="Custom alias"
+                    optional
+                    mono
+                    prefix={`${BASE_APP_DOMAIN}/`}
+                    placeholder="spring26"
+                    value={alias}
+                    onChange={(e) => { setAlias(e.target.value.replace(/\s/g, '')); setErrors((x) => ({ ...x, alias: '' })) }}
+                    error={errors.alias}
+                  />
+                  <div className="row create-actions" style={{ gap: 10, marginTop: 4 }}>
+                    <Btn type="button" variant="ghost" onClick={handleClose} style={{ flex: 'none' }}>
+                      Cancel
+                    </Btn>
+                    <Btn
+                      type="submit"
+                      className="btn-block"
+                      loading={loading}
+                      iconRight={loading ? undefined : 'arrowRight'}
+                    >
+                      {loading ? 'Creating link…' : 'Create link'}
+                    </Btn>
+                  </div>
+                </form>
+              </div>
+            </Drawer.Content>
+          </Drawer.Portal>
+        </Drawer.Root>
+      </>
     )
   }
 
+  /* ---- Desktop: backdrop overlay ---- */
   return (
-    <Drawer.Root
-      modal={true}
-      defaultOpen={longLink}
-      onOpenChange={(res) => {
-        if (!res) {
-          router.push('/dashboard')
-        }
-      }}
-    >
-      <Drawer.Trigger asChild>
-        <ShimmerButton className="shadow-2xl">
-          <span className="whitespace-pre-wrap text-center text-xs leading-none tracking-tight text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
-            Create Link
-          </span>
-        </ShimmerButton>
-      </Drawer.Trigger>
-      <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 bg-black/40" />
-        <Drawer.Content className="bg-[#161615] text-white flex flex-col fixed bottom-0 left-0 right-0 max-h-[82vh] rounded-t-[10px]">
-          <div className="max-w-md w-full mx-auto overflow-auto p-4 rounded-t-[10px]">
-            <Drawer.Handle />
-            <Drawer.Title className="font-medium text-white mt-8">Create a new Link</Drawer.Title>
-            <Drawer.Description className="leading-6 mt-2 text-gray-400">
-              Fill in the information below to create your new link.
-            </Drawer.Description>
+    <>
+      {!open && triggerBtn}
+      {open && (
+        <Backdrop onClose={handleClose}>
+          <div
+            className="create-overlay"
+            onMouseDown={(e) => e.stopPropagation()}
+            style={{
+              background: 'var(--surface)',
+              width: '100%',
+              maxWidth: 880,
+              borderRadius: 'var(--r-xl)',
+              boxShadow: 'var(--shadow-pop)',
+              overflow: 'hidden',
+              border: '1px solid var(--border)',
+              display: 'grid',
+              gridTemplateColumns: '1fr 320px',
+              animation: 'popIn .32s var(--ease-spring)',
+              maxHeight: '92vh',
+            }}
+          >
+            {/* form side */}
+            <div className="col create-form" style={{ padding: 30, gap: 20, overflowY: 'auto' }}>
+              <div className="row" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div className="col" style={{ gap: 5 }}>
+                  <span className="eyebrow">New link</span>
+                  <h2 style={{ fontSize: 26 }}>Create a short link</h2>
+                </div>
+                <button className="iconbtn create-close" onClick={handleClose} aria-label="close" style={{ flex: 'none' }}>
+                  <Icon name="x" size={18} />
+                </button>
+              </div>
 
-            <div className="relative w-full aspect-square max-w-[300px] mx-auto mt-4">
-              <QRContainer showQR={!!formValues?.longUrl} qrRef={ref}>
-                {formValues?.longUrl && (
-                  <QRCode {...qrCodeProps} ref={ref} value={formValues.longUrl} />
+              <form className="col" style={{ gap: 17 }} onSubmit={submit} noValidate>
+                {(formErr || error) && (
+                  <div className="form-error">
+                    <Icon name="alert" size={18} /> {formErr || error?.message}
+                  </div>
                 )}
-              </QRContainer>
+                <Field
+                  label="Title"
+                  placeholder="e.g. Spring product launch"
+                  value={title}
+                  onChange={(e) => { setTitle(e.target.value); setErrors((x) => ({ ...x, title: '' })) }}
+                  error={errors.title}
+                  autoFocus
+                />
+                <Field
+                  label="Long URL"
+                  mono
+                  leadIcon="link"
+                  placeholder="https://example.com/very/long/path"
+                  value={url}
+                  onChange={(e) => { setUrl(e.target.value); setErrors((x) => ({ ...x, url: '' })) }}
+                  error={errors.url}
+                />
+                <Field
+                  label="Custom alias"
+                  optional
+                  mono
+                  prefix={`${BASE_APP_DOMAIN}/`}
+                  placeholder="spring26"
+                  value={alias}
+                  onChange={(e) => { setAlias(e.target.value.replace(/\s/g, '')); setErrors((x) => ({ ...x, alias: '' })) }}
+                  error={errors.alias}
+                />
+                <div className="row create-actions" style={{ gap: 10, marginTop: 4 }}>
+                  <Btn type="button" variant="ghost" onClick={handleClose} style={{ flex: 'none' }}>
+                    Cancel
+                  </Btn>
+                  <Btn
+                    type="submit"
+                    className="btn-block"
+                    loading={loading}
+                    iconRight={loading ? undefined : 'arrowRight'}
+                  >
+                    {loading ? 'Creating link…' : 'Create link'}
+                  </Btn>
+                </div>
+              </form>
             </div>
 
-            <Label htmlFor="title" className="font-medium text-white text-sm mt-8 mb-2 block">
-              Title
-            </Label>
-            <Input
-              id="title"
-              placeholder="Short Link's Title"
-              value={formValues.title}
-              onChange={handleChange}
-              className="border border-gray-200 w-full rounded-lg outline-none focus:ring-2 focus:ring-gray-500 bg-zinc-950 text-neutral-300"
-            />
-            {errors.title && <ErrorMessage message={errors.title} />}
-
-            <Label htmlFor="longUrl" className="font-medium text-white text-sm mt-8 mb-2 block">
-              Long URL
-            </Label>
-            <Input
-              id="longUrl"
-              placeholder="Enter your Loooong URL"
-              value={formValues.longUrl}
-              onChange={handleChange}
-              className="bg-zinc-950 text-neutral-300 border border-gray-200 w-full rounded-lg outline-none focus:ring-2 focus:ring-gray-500"
-            />
-            {errors.longUrl && <ErrorMessage message={errors.longUrl} />}
-
-            <Label htmlFor="customUrl" className="font-medium text-white text-sm mt-8 mb-2 block">
-              Custom URL (optional)
-            </Label>
-            <div className="flex items-center gap-2">
-              <Badge className="p-2 bg-zinc-600" variant={'outline'}>
-                {BASE_APP_DOMAIN}
-              </Badge>{' '}
-              /
-              <Input
-                id="customUrl"
-                placeholder="Custom URL"
-                value={formValues.customUrl}
-                onChange={handleChange}
-                className="bg-zinc-950 text-neutral-300 border border-gray-200 dark:border-gray-700 w-full rounded-lg outline-none focus:ring-2 focus:ring-gray-500"
-              />
-            </div>
-            {error && <ErrorMessage message={error.message} />}
-
-            <GradientButton
-              onClick={createNewLink}
-              disabled={loading}
-              className="mt-4 w-fit h-12 flex items-center justify-center px-12 rounded-lg"
+            {/* live QR preview side */}
+            <div
+              className="create-preview col"
+              style={{
+                padding: 30, gap: 16,
+                alignItems: 'center', justifyContent: 'center', textAlign: 'center',
+                background: 'linear-gradient(165deg,var(--surface-2),var(--surface-3))',
+                borderLeft: '1px solid var(--border)',
+              }}
             >
-              {loading ? <BeatLoader size={10} color="rose-400" /> : 'Create'}
-            </GradientButton>
-
-            {/* <Button variant='outline' onClick={handleDrawerClose}>
-              Cancel
-            </Button> */}
+              <span className="eyebrow" style={{ color: 'var(--violet)' }}>Live preview</span>
+              <div style={{ transition: 'transform .3s var(--ease-spring)', transform: previewUrl ? 'scale(1)' : 'scale(.97)' }}>
+                {previewUrl ? (
+                  <div className="qr-card" style={{ padding: 14 }}>
+                    <QRCode
+                      ref={qrRef}
+                      value={previewUrl}
+                      size={172}
+                      qrStyle={QR_STYLE}
+                      eyeRadius={QR_EYE_RADIUS}
+                      bgColor={QR_BG_COLOR}
+                      fgColor={QR_FG_COLOR}
+                    />
+                  </div>
+                ) : (
+                  <div className="qr-empty" style={{ width: 200, height: 200 }}>
+                    <Icon name="qr" size={32} />
+                    <span style={{ fontSize: 12.5, fontWeight: 600, maxWidth: 150 }}>
+                      Start typing a URL and your QR code appears here
+                    </span>
+                  </div>
+                )}
+              </div>
+              {previewUrl ? (
+                <div className="col center" style={{ gap: 4 }}>
+                  <span className="mono" style={{ fontSize: 14, fontWeight: 600, color: 'var(--primary-2)' }}>
+                    {BASE_APP_DOMAIN}/{alias.trim() || '••••••'}
+                  </span>
+                  <span style={{ fontSize: 12, color: 'var(--ink-3)', maxWidth: 220, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {(() => {
+                      try { const u = new URL(previewUrl); return (u.hostname + u.pathname).replace(/\/$/, '') }
+                      catch { return previewUrl }
+                    })()}
+                  </span>
+                </div>
+              ) : (
+                <span style={{ fontSize: 12.5, color: 'var(--ink-3)', maxWidth: 200 }}>
+                  Your QR code updates in real time as you type.
+                </span>
+              )}
+            </div>
           </div>
-        </Drawer.Content>
-      </Drawer.Portal>
-    </Drawer.Root>
+        </Backdrop>
+      )}
+    </>
   )
 }

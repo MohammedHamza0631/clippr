@@ -1,9 +1,11 @@
 import localFont from 'next/font/local'
 import './globals.css'
 import Script from 'next/script'
+import { ThemeProvider } from 'next-themes'
 import Footer from '@/components/Footer'
 import Header from '@/components/Header'
 import UrlProvider from '@/context/url-provider'
+import { ToastProvider } from '@/components/ds'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -17,24 +19,26 @@ const geistMono = localFont({
 })
 
 export const metadata = {
-  title: 'Clippr',
-  description: [
-    'URL shortener with a focus on privacy and speed.',
-    'Clippr is a URL shortener that allows you to shorten URLs and share them with your friends.',
-    'Gain insights into your audience and track your performance with Clippr.',
-  ],
+  title: 'Clippr — Short links that tell you everything',
+  description:
+    'Turn any URL into a clean short link with a built-in QR code, then watch clicks roll in by city and device.',
 }
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <UrlProvider>
-          <Header />
-
-          <main className="mt-20 min-h-screen">{children}</main>
-          <Footer />
-        </UrlProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem={false}>
+          <UrlProvider>
+            <ToastProvider>
+              <div className="app-bg" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+                <Header />
+                <main style={{ flex: 1 }}>{children}</main>
+                <Footer />
+              </div>
+            </ToastProvider>
+          </UrlProvider>
+        </ThemeProvider>
       </body>
       <Script src="https://scripts.simpleanalyticscdn.com/latest.js" data-collect-dnt="true" />
     </html>

@@ -1,261 +1,582 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import {
-  Check,
-  Copy,
-  Dices as Devices,
-  Download,
-  Globe2,
-  LinkIcon,
-  MousePointerClick,
-  Trash,
-} from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { use, useEffect, useState } from 'react'
-import { BarLoader, BeatLoader } from 'react-spinners'
-import DeviceStats from '@/components/device-stats'
-import LocationStats from '@/components/location-stats'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { use, useEffect, useMemo, useState } from 'react'
+import { Btn, CountUp, Icon, Sk, useToast } from '@/components/ds'
+import { BarChart, DonutChart } from '@/components/ds-charts'
 import { UrlState } from '@/context/url-provider'
 import { getClicksForUrl } from '@/db/apiClicks'
 import { deleteUrl, getUrl } from '@/db/apiUrls'
 import useFetch from '@/hooks/use-fetch'
-import {
-  BASE_APP_URL,
-  FEEDBACK_TIMEOUT_MS,
-  LOADER_COLOR,
-  QR_DETAIL_SIZE,
-} from '@/lib/constants'
+import { BASE_APP_DOMAIN, FEEDBACK_TIMEOUT_MS } from '@/lib/constants'
 
-const LinkPage = ({ params }) => {
-  const { id } = use(params)
-  const { user } = UrlState()
-  const router = useRouter()
-  const [copied, setCopied] = useState(false)
-  const [downloading, setDownloading] = useState(false)
-  const [imageLoaded, setImageLoaded] = useState(false)
+function fmt(n) {
+  return (n || 0).toLocaleString('en-US')
+}
 
-  const { loading, data: url, fn: fnGetUrl, error } = useFetch(getUrl, { id, user_id: user?.id })
+function fmtDate(ts) {
+  if (!ts) return ''
+  return new Date(ts).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
 
-  const { loading: loadingStats, data: stats, fn: fnStats } = useFetch(getClicksForUrl, { url_id: id, user_id: user?.id })
+function relDate(ts) {
+  if (!ts) return ''
+  const d = Math.floor((Date.now() - new Date(ts).getTime()) / 86400000)
+  if (d <= 0) return 'today'
+  if (d === 1) return 'yesterday'
+  if (d < 30) return `${d}d ago`
+  if (d < 365) return `${Math.floor(d / 30)}mo ago`
+  return `${Math.floor(d / 365)}y ago`
+}
 
-  const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, { id, user_id: user?.id })
-
-  useEffect(() => {
-    if (user && user.id) {
-      fnGetUrl()
-    }
-  }, [user])
-
-  useEffect(() => {
-    if (!error && loading === false) {
-      fnStats()
-    }
-  }, [loading, error])
-
-  useEffect(() => {
-    if (error) {
-      router.push('/dashboard')
-    }
-  }, [error])
-
-  const link = url?.custom_url ? url?.custom_url : url?.short_url
-
-  const downloadImage = async () => {
-    const imageUrl = url?.qr_code
-    const fileName = url?.title
-    if (!imageUrl) {
-      console.error('Image URL is missing.')
-      return
-    }
-
-    try {
-      setDownloading(true)
-      const response = await fetch(imageUrl)
-      const blob = await response.blob()
-      const blobUrl = URL.createObjectURL(blob)
-      const anchor = document.createElement('a')
-      anchor.href = blobUrl
-      anchor.download = `${fileName}.png`
-      document.body.appendChild(anchor)
-      anchor.click()
-      document.body.removeChild(anchor)
-      URL.revokeObjectURL(blobUrl)
-      setTimeout(() => setDownloading(false), FEEDBACK_TIMEOUT_MS)
-    } catch (error) {
-      console.error('Failed to download image:', error)
-    }
+/* Transform raw clicks array to analytics shape */
+function transformStats(stats) {
+  if (!stats?.length) {
+    return { total: 0, cities: [], devices: { mobile: 0, desktop: 0, tablet: 0 } }
   }
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(BASE_APP_URL + (url?.custom_url ? url?.custom_url : url.short_url))
-    setCopied(true)
-    setTimeout(() => setCopied(false), FEEDBACK_TIMEOUT_MS)
+  const cityCount = {}
+  const devices = { mobile: 0, desktop: 0, tablet: 0 }
+  for (const s of stats) {
+    if (s.city) cityCount[s.city] = (cityCount[s.city] || 0) + 1
+    const d = (s.device || '').toLowerCase()
+    if (d === 'mobile') devices.mobile++
+    else if (d === 'desktop') devices.desktop++
+    else if (d === 'tablet') devices.tablet++
   }
+  const cities = Object.entries(cityCount)
+    .map(([name, clicks]) => ({ name, clicks }))
+    .sort((a, b) => b.clicks - a.clicks)
+    .slice(0, 5)
+  return { total: stats.length, cities, devices }
+}
 
+/* ---- Action button ---- */
+function ActionBtn({ icon, label, onClick, variant, active }) {
+  const danger = variant === 'danger'
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {(loading || loadingStats) && <BarLoader width={'100%'} color={LOADER_COLOR} />}
+    <button
+      onClick={onClick}
+      className="row detail-action"
+      style={{
+        gap: 9,
+        padding: '11px 16px',
+        borderRadius: 'var(--r-md)',
+        fontWeight: 700,
+        fontSize: 14.5,
+        cursor: 'pointer',
+        border: '1px solid',
+        transition: 'all .16s var(--ease)',
+        background: active
+          ? 'var(--success-soft)'
+          : danger
+          ? 'var(--danger-soft)'
+          : 'var(--surface)',
+        borderColor: active
+          ? 'transparent'
+          : danger
+          ? 'var(--danger-line)'
+          : 'var(--border-2)',
+        color: active ? 'var(--success)' : danger ? 'var(--danger)' : 'var(--ink)',
+      }}
+      onMouseEnter={(e) => {
+        if (danger) {
+          e.currentTarget.style.background = 'var(--danger)'
+          e.currentTarget.style.color = '#fff'
+          e.currentTarget.style.borderColor = 'var(--danger)'
+        } else if (!active) {
+          e.currentTarget.style.background = 'var(--surface-2)'
+          e.currentTarget.style.borderColor = 'var(--ink-3)'
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (danger) {
+          e.currentTarget.style.background = 'var(--danger-soft)'
+          e.currentTarget.style.color = 'var(--danger)'
+          e.currentTarget.style.borderColor = 'var(--danger-line)'
+        } else if (!active) {
+          e.currentTarget.style.background = 'var(--surface)'
+          e.currentTarget.style.borderColor = 'var(--border-2)'
+        }
+      }}
+    >
+      <Icon name={active ? 'check' : icon} size={17} />
+      {active ? 'Done' : label}
+    </button>
+  )
+}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Link Details Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="space-y-6"
-        >
-          <div className="bg-white/[0.02] border border-white/[0.08] rounded-lg p-6 space-y-6">
-            <h1 className="text-3xl font-bold ">{url?.title}</h1>
-
-            {link && (
-              <a
-                href={`${BASE_APP_URL}${link}`}
-                target="_blank"
-                rel="noreferrer"
-                className="block text-xl text-indigo-400 hover:text-indigo-300 transition-colors break-all"
-              >
-                {BASE_APP_URL}{link}
-              </a>
-            )}
-
-            <a
-              href={url?.original_url}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 text-white/60 hover:text-white/80 transition-colors break-all"
-            >
-              <LinkIcon className="h-4 w-4 flex-shrink-0" />
-              {url?.original_url}
-            </a>
-
-            <div className="text-white/40 text-sm">
-              Created {url?.created_at ? new Date(url.created_at).toLocaleString() : null}
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={copyToClipboard}
-                className="relative bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] text-white"
-              >
-                <span className="sr-only">{copied ? 'Copied' : 'Copy'}</span>
-                <Copy
-                  className={`h-4 w-4 transition-all duration-300 ${copied ? 'scale-0' : 'scale-100'}`}
-                />
-                <Check
-                  className={`absolute inset-0 m-auto h-4 w-4 transition-all duration-300 ${copied ? 'scale-100' : 'scale-0'}`}
-                />
-              </Button>
-
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={downloadImage}
-                className="relative bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] text-white"
-              >
-                <span className="sr-only">{downloading ? 'Downloaded' : 'Download QR'}</span>
-                <Download
-                  className={`h-4 w-4 transition-all duration-300 ${downloading ? 'scale-0' : 'scale-100'}`}
-                />
-                <Check
-                  className={`absolute inset-0 m-auto h-4 w-4 transition-all duration-300 ${downloading ? 'scale-100' : 'scale-0'}`}
-                />
-              </Button>
-
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => fnDelete().then(() => router.push('/dashboard'))}
-                disabled={loadingDelete}
-                className="bg-white/[0.02] border-white/[0.08] hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 text-white/80"
-              >
-                {loadingDelete ? (
-                  <BeatLoader size={5} color="white" />
-                ) : (
-                  <Trash className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-
-            <div className="relative">
-              {!imageLoaded && <Skeleton className="h-64 w-64 rounded-lg bg-white/[0.02]" />}
-              {url?.qr_code && (
-                <Image
-                  src={url.qr_code}
-                  width={QR_DETAIL_SIZE}
-                  height={QR_DETAIL_SIZE}
-                  className={`h-64 w-64 rounded-lg border border-indigo-500/20 bg-white/[0.02] p-2 transition-opacity duration-300 ${
-                    imageLoaded ? 'opacity-100' : 'opacity-0'
-                  }`}
-                  alt="QR code"
-                  onLoad={() => setImageLoaded(true)}
-                />
-              )}
-            </div>
+/* ---- Analytics skeleton ---- */
+function AnalyticsSkeleton() {
+  return (
+    <div
+      className="detail-analytics"
+      style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 20 }}
+    >
+      <div className="card card-pad col" style={{ gap: 18 }}>
+        <Sk w={120} h={16} />
+        {[0, 1, 2, 3, 4].map((i) => (
+          <div key={i} className="col" style={{ gap: 7 }}>
+            <Sk w="40%" h={13} />
+            <Sk w="100%" h={12} r={99} />
           </div>
-        </motion.div>
-
-        {/* Stats Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <Card className="bg-white/[0.02] border-white/[0.08]">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold ">Analytics Overview</CardTitle>
-            </CardHeader>
-
-            {stats && stats.length ? (
-              <CardContent className="space-y-8">
-                <Card className="bg-white/[0.02] border-white/[0.08]">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-white/90">
-                      <MousePointerClick className="h-5 w-5 text-rose-400" />
-                      Total Clicks
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-rose-300 to-white/90">
-                      {stats?.length}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <div className="space-y-6">
-                  <div className="space-y-4">
-                    <h3 className="flex items-center gap-2 text-lg font-semibold text-white/90">
-                      <Globe2 className="h-5 w-5 text-cyan-400" />
-                      Geographic Distribution
-                    </h3>
-                    <LocationStats stats={stats} />
-                  </div>
-
-                  <div className="space-y-4">
-                    <h3 className="flex items-center gap-2 text-lg font-semibold text-white/90">
-                      <Devices className="h-5 w-5 text-amber-400" />
-                      Device Breakdown
-                    </h3>
-                    <DeviceStats stats={stats} />
-                  </div>
-                </div>
-              </CardContent>
-            ) : (
-              <CardContent className="text-white/60 text-center py-12">
-                {loadingStats ? 'Loading analytics...' : 'No clicks recorded yet'}
-              </CardContent>
-            )}
-          </Card>
-        </motion.div>
+        ))}
+      </div>
+      <div className="card card-pad col center" style={{ gap: 18 }}>
+        <Sk w={120} h={16} style={{ alignSelf: 'flex-start' }} />
+        <Sk w={170} h={170} r={99} />
       </div>
     </div>
   )
 }
 
-export default LinkPage
+/* ---- Analytics empty ---- */
+function AnalyticsEmpty() {
+  return (
+    <div
+      className="card"
+      style={{
+        padding: '56px 32px',
+        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 14,
+        borderStyle: 'dashed',
+        background: 'var(--surface-2)',
+      }}
+    >
+      <div
+        style={{
+          width: 64,
+          height: 64,
+          borderRadius: 16,
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'var(--primary)',
+          boxShadow: 'var(--shadow-sm)',
+        }}
+      >
+        <Icon name="chart" size={28} />
+      </div>
+      <h3 style={{ fontSize: 21 }}>No clicks yet</h3>
+      <p
+        style={{ color: 'var(--ink-2)', fontSize: 15, maxWidth: 360, lineHeight: 1.55 }}
+      >
+        Share your short link or QR code — the moment someone visits, their city and device
+        show up right here.
+      </p>
+      <div className="row" style={{ gap: 8, marginTop: 4 }}>
+        <span className="badge badge-muted">
+          <Icon name="mapPin" size={13} /> City data
+        </span>
+        <span className="badge badge-muted">
+          <Icon name="smartphone" size={13} /> Device split
+        </span>
+      </div>
+    </div>
+  )
+}
+
+export default function LinkPage({ params }) {
+  const { id } = use(params)
+  const { user } = UrlState()
+  const router = useRouter()
+  const toast = useToast()
+  const [copied, setCopied] = useState(false)
+  const [downloading, setDownloading] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  const { loading, data: url, fn: fnGetUrl, error } = useFetch(getUrl, { id, user_id: user?.id })
+  const { loading: loadingStats, data: stats, fn: fnStats } = useFetch(getClicksForUrl, {
+    url_id: id,
+    user_id: user?.id,
+  })
+  const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, {
+    id,
+    user_id: user?.id,
+  })
+
+  useEffect(() => {
+    if (user?.id) fnGetUrl()
+  }, [user])
+
+  useEffect(() => {
+    if (!error && loading === false) fnStats()
+  }, [loading, error])
+
+  useEffect(() => {
+    if (error) router.push('/dashboard')
+  }, [error])
+
+  const shortCode = url?.custom_url || url?.short_url
+  const shortUrl = shortCode ? `${BASE_APP_DOMAIN}/${shortCode}` : ''
+  const fullShort = shortUrl ? 'https://' + shortUrl : ''
+
+  const analytics = useMemo(() => transformStats(stats), [stats])
+  const hasClicks = analytics.total > 0
+
+  const copy = () => {
+    if (!fullShort) return
+    navigator.clipboard?.writeText(fullShort)
+    setCopied(true)
+    toast?.('Short link copied to clipboard', 'info')
+    setTimeout(() => setCopied(false), FEEDBACK_TIMEOUT_MS)
+  }
+
+  const downloadImage = async () => {
+    const imageUrl = url?.qr_code
+    if (!imageUrl) return
+    try {
+      setDownloading(true)
+      const res = await fetch(imageUrl)
+      const blob = await res.blob()
+      const blobUrl = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = blobUrl
+      a.download = `${url?.title || 'qr'}.png`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(blobUrl)
+      toast?.('QR code downloaded as PNG')
+      setTimeout(() => setDownloading(false), FEEDBACK_TIMEOUT_MS)
+    } catch {
+      setDownloading(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    await fnDelete()
+    toast?.('Link deleted', 'danger')
+    router.push('/dashboard')
+  }
+
+  if (loading) {
+    return (
+      <div className="wrap anim-in detail-mono" style={{ maxWidth: 1080, padding: '28px 24px 80px' }}>
+        <Sk w={140} h={20} style={{ marginBottom: 24 }} />
+        <div className="card" style={{ padding: 26, marginBottom: 20 }}>
+          <Sk w="60%" h={28} style={{ marginBottom: 14 }} />
+          <Sk w="40%" h={20} style={{ marginBottom: 8 }} />
+          <Sk w="70%" h={14} style={{ marginBottom: 16 }} />
+          <div className="row" style={{ gap: 10 }}>
+            <Sk w={120} h={42} r={11} />
+            <Sk w={120} h={42} r={11} />
+            <Sk w={100} h={42} r={11} />
+          </div>
+        </div>
+        <AnalyticsSkeleton />
+      </div>
+    )
+  }
+
+  if (!url) return null
+
+  return (
+    <div
+      className="wrap anim-in detail-mono"
+      style={{ maxWidth: 1080, padding: '28px 24px 80px' }}
+    >
+      {/* back nav */}
+      <Link
+        href="/dashboard"
+        className="row"
+        style={{
+          gap: 7,
+          color: 'var(--ink-2)',
+          fontWeight: 600,
+          fontSize: 14.5,
+          padding: '6px 0',
+          marginBottom: 18,
+          width: 'fit-content',
+          transition: 'color .14s',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink)')}
+        onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ink-2)')}
+      >
+        <Icon name="arrowLeft" size={17} /> Back to dashboard
+      </Link>
+
+      {/* top card */}
+      <div
+        className="card detail-top"
+        style={{
+          padding: 26,
+          display: 'grid',
+          gridTemplateColumns: '1fr auto',
+          gap: 28,
+          marginBottom: 20,
+        }}
+      >
+        <div className="col" style={{ gap: 16, minWidth: 0 }}>
+          <div className="col" style={{ gap: 10 }}>
+            <div className="row" style={{ gap: 10, flexWrap: 'wrap' }}>
+              <h1 style={{ fontSize: 25 }}>{url.title}</h1>
+              {url.custom_url && (
+                <span className="badge badge-violet">custom alias</span>
+              )}
+            </div>
+
+            <a
+              href={fullShort}
+              target="_blank"
+              rel="noreferrer"
+              className="row"
+              style={{ gap: 8, width: 'fit-content', maxWidth: '100%' }}
+              onMouseEnter={(e) => {
+                const s = e.currentTarget.querySelector('.su')
+                if (s) s.style.textDecoration = 'underline'
+              }}
+              onMouseLeave={(e) => {
+                const s = e.currentTarget.querySelector('.su')
+                if (s) s.style.textDecoration = 'none'
+              }}
+            >
+              <span
+                className="su mono"
+                style={{
+                  fontSize: 'clamp(20px,3vw,27px)',
+                  fontWeight: 600,
+                  color: 'var(--primary)',
+                  letterSpacing: '-.02em',
+                }}
+              >
+                {shortUrl}
+              </span>
+              <Icon
+                name="external"
+                size={18}
+                style={{ color: 'var(--primary)', flex: 'none' }}
+              />
+            </a>
+
+            <a
+              href={url.original_url}
+              target="_blank"
+              rel="noreferrer"
+              className="row"
+              style={{ gap: 7, color: 'var(--ink-3)', fontSize: 14, minWidth: 0, transition: 'color .14s' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-2)')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ink-3)')}
+            >
+              <Icon name="arrowUpRight" size={15} style={{ flex: 'none' }} />
+              <span
+                style={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {url.original_url}
+              </span>
+            </a>
+
+            <span
+              className="row"
+              style={{ gap: 6, fontSize: 13.5, color: 'var(--ink-3)', fontWeight: 500 }}
+            >
+              <Icon name="calendar" size={14} /> Created {fmtDate(url.created_at)} ·{' '}
+              {relDate(url.created_at)}
+            </span>
+          </div>
+
+          <div
+            className="row detail-actions"
+            style={{ gap: 10, flexWrap: 'wrap', marginTop: 'auto' }}
+          >
+            <ActionBtn icon="copy" label="Copy link" onClick={copy} active={copied} />
+            <ActionBtn
+              icon="download"
+              label="Download QR"
+              onClick={downloadImage}
+              active={downloading}
+            />
+            {!showDeleteConfirm ? (
+              <ActionBtn
+                icon="trash"
+                label="Delete"
+                variant="danger"
+                onClick={() => setShowDeleteConfirm(true)}
+              />
+            ) : (
+              <div className="row" style={{ gap: 8 }}>
+                <ActionBtn
+                  icon="trash"
+                  label="Confirm delete"
+                  variant="danger"
+                  onClick={handleDelete}
+                  active={loadingDelete}
+                />
+                <ActionBtn
+                  icon="x"
+                  label="Cancel"
+                  onClick={() => setShowDeleteConfirm(false)}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* QR code */}
+        <div className="detail-qr col center" style={{ gap: 12 }}>
+          {url.qr_code ? (
+            <div className="qr-card" style={{ padding: 14 }}>
+              <Image
+                src={url.qr_code}
+                width={188}
+                height={188}
+                alt="QR code"
+                style={{ display: 'block', borderRadius: 4 }}
+              />
+            </div>
+          ) : (
+            <div
+              className="qr-empty"
+              style={{ width: 196, height: 196 }}
+            >
+              <Icon name="qr" size={28} />
+              <span style={{ fontSize: 12.5, fontWeight: 600 }}>No QR available</span>
+            </div>
+          )}
+          <span className="mono" style={{ fontSize: 11.5, color: 'var(--ink-3)' }}>
+            scan to open
+          </span>
+        </div>
+      </div>
+
+      {/* analytics header */}
+      <div
+        className="row"
+        style={{ justifyContent: 'space-between', alignItems: 'center', margin: '4px 2px 16px' }}
+      >
+        <h2 style={{ fontSize: 21 }}>Analytics</h2>
+        {!loadingStats && hasClicks && (
+          <span className="badge badge-muted">
+            <span className="dot" style={{ background: 'var(--success)' }} /> tracking live
+          </span>
+        )}
+      </div>
+
+      {loadingStats ? (
+        <AnalyticsSkeleton />
+      ) : !hasClicks ? (
+        <AnalyticsEmpty />
+      ) : (
+        <div className="col" style={{ gap: 20 }}>
+          {/* big number */}
+          <div
+            className="card detail-bignum"
+            style={{
+              padding: 26,
+              display: 'flex',
+              gap: 26,
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
+            <div className="col" style={{ gap: 2 }}>
+              <span className="eyebrow">Total clicks</span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'clamp(38px,5.5vw,58px)',
+                  fontWeight: 700,
+                  letterSpacing: '-.03em',
+                  lineHeight: 1,
+                }}
+              >
+                <CountUp value={analytics.total} />
+              </span>
+            </div>
+            <div
+              className="detail-divider"
+              style={{ width: 1, height: 56, background: 'var(--border)' }}
+            />
+            <div className="row" style={{ gap: 22, flexWrap: 'wrap' }}>
+              <div className="col">
+                <span
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 700,
+                    fontFamily: 'var(--font-display)',
+                  }}
+                >
+                  {analytics.cities.length}
+                </span>
+                <span style={{ fontSize: 12.5, color: 'var(--ink-3)', fontWeight: 600 }}>
+                  cities reached
+                </span>
+              </div>
+              <div className="col">
+                <span
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 700,
+                    fontFamily: 'var(--font-display)',
+                  }}
+                >
+                  {analytics.cities[0]?.name || '—'}
+                </span>
+                <span style={{ fontSize: 12.5, color: 'var(--ink-3)', fontWeight: 600 }}>
+                  top city
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* charts */}
+          <div
+            className="detail-analytics"
+            style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 20 }}
+          >
+            <div className="card card-pad">
+              <div
+                className="row"
+                style={{ justifyContent: 'space-between', marginBottom: 20 }}
+              >
+                <h3
+                  style={{
+                    fontSize: 17,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <Icon name="mapPin" size={17} style={{ color: 'var(--primary)' }} /> Top
+                  cities
+                </h3>
+                <span className="badge badge-muted">top 5</span>
+              </div>
+              <BarChart data={analytics.cities} />
+            </div>
+            <div className="card card-pad">
+              <div className="row" style={{ marginBottom: 20 }}>
+                <h3
+                  style={{
+                    fontSize: 17,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <Icon name="smartphone" size={17} style={{ color: 'var(--violet)' }} />{' '}
+                  Devices
+                </h3>
+              </div>
+              <DonutChart devices={analytics.devices} size={180} />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

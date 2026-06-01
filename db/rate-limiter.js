@@ -105,7 +105,10 @@ export function getIdentifier(req) {
     const sessionId =
       typeof localStorage !== 'undefined' ? localStorage.getItem('session_id') : null
     if (!sessionId && typeof localStorage !== 'undefined') {
-      const newSessionId = crypto.randomUUID()
+      const newSessionId =
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : Math.random().toString(36).slice(2) + Date.now().toString(36)
       localStorage.setItem('session_id', newSessionId)
       return `client:${newSessionId}`
     }

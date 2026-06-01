@@ -1,12 +1,14 @@
 /** @type {import('next').NextConfig} */
+const supabaseHostname = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co').hostname
+
 const nextConfig = {
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'hndxrumxkadaokymltup.supabase.co', // Replace with your Supabase bucket's hostname
+        hostname: supabaseHostname,
         port: '',
-        pathname: '/storage/v1/object/public/**', // Adjust to match the bucket structure
+        pathname: '/storage/v1/object/public/**',
       },
     ],
   },
